@@ -8,3 +8,7 @@
 /HackVmCompiler/HackVmCompiler/obj
 /HackVmCompiler/HackVmCompiler/bin
 /HackVmCompiler/.vs
+/HackVmCompiler/HackCPUMock/bin/Debug/netcoreapp3.1
+/HackVmCompiler/HackCPUMock/obj
+/HackVmCompiler/HackVmCompilerTests/obj
+/HackVmCompiler/HackVmCompilerTests/bin/Debug/net5.0
