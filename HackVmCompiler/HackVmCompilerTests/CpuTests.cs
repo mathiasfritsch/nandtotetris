@@ -50,5 +50,28 @@ M=D
 
             Assert.AreEqual(21, cpu.RAM[5]);
         }
+
+        [TestMethod]
+        public void AddTest()
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(@"@21
+D=A
+@5
+D=A+D
+") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            while (true)
+            {
+                if (!cpu.Step()) break;
+            }
+
+            Assert.AreEqual(26, cpu.D);
+        }
     }
 }

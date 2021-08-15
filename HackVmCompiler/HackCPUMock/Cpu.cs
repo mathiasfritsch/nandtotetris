@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.IO.Abstractions;
 
@@ -12,6 +11,7 @@ namespace HackCPUMock
         public Cpu(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
+            RAM[0] = 256;
         }
 
         public void ReadAsm(string path)
@@ -108,7 +108,18 @@ namespace HackCPUMock
 
         private void HandleAInstruction()
         {
-            A = int.Parse(Instruction.TrimStart('@'));
+            if (Instruction == ("@SP"))
+            {
+                A = 0;
+            }
+            else if (Instruction.StartsWith("@R"))
+            {
+                A = int.Parse(Instruction.Replace("@R", ""));
+            }
+            else
+            {
+                A = int.Parse(Instruction.TrimStart('@'));
+            }
         }
 
         public void Reset()
