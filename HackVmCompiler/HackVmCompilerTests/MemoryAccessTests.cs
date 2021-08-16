@@ -10,7 +10,7 @@ namespace HackVmCompilerTests
     [TestClass]
     public class MemoryAccessTests
     {
-        private static Cpu CompileVmAndRunOnCpu(string vmCode)
+        private static Cpu CompileVmAndRunOnCpu(string vmCode, Dictionary<int, int> initialData = null)
         {
             string vmFile = @"C:\somefile.vm";
             string asmFile = @"C:\loadconstant.asm";
@@ -44,6 +44,14 @@ namespace HackVmCompilerTests
             codeWriter.Dispose();
 
             var cpu = new Cpu(fileSystem);
+            if (initialData != null)
+            {
+                foreach (var address in initialData.Keys)
+                {
+                    cpu.RAM[address] = initialData[address];
+                }
+            }
+
             cpu.ReadAsm(asmFile);
 
             while (true)
@@ -89,8 +97,55 @@ push this 6
 add
 sub
 push temp 6
-add");
+add",
+                new Dictionary<int, int>
+                {
+                    {0,256},
+                    {1,300},
+                    {2,400},
+                    {3,3000 },
+                    {4,3010 }
+                });
+
             Assert.AreEqual(472, cpu.RAM[256]);
+            Assert.AreEqual(10, cpu.RAM[300]);
+            Assert.AreEqual(21, cpu.RAM[401]);
+            Assert.AreEqual(22, cpu.RAM[402]);
+            Assert.AreEqual(36, cpu.RAM[3006]);
+            Assert.AreEqual(42, cpu.RAM[3012]);
+            Assert.AreEqual(45, cpu.RAM[3015]);
+            Assert.AreEqual(510, cpu.RAM[11]);
+        }
+
+        [TestMethod]
+        public void PopThis()
+        {
+            var cpu = CompileVmAndRunOnCpu(
+                @"pop this 6",
+                new Dictionary<int, int>
+                {
+                    { 3,3030},
+                    { 0,257},
+                    { 256,241}
+                });
+
+            Assert.AreEqual(241, cpu.RAM[3036]);
+        }
+
+        [TestMethod]
+        public void PushThis()
+        {
+            var cpu = CompileVmAndRunOnCpu(
+                @"push this 5",
+                new Dictionary<int, int>
+                {
+                    { 3,3030},
+                    { 5,3030},
+                    { 3035,305}
+                });
+
+            Assert.AreEqual(305, cpu.RAM[256]);
+            Assert.AreEqual(257, cpu.RAM[0]);
         }
     }
 }

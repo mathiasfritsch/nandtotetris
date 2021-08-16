@@ -83,21 +83,19 @@ namespace HackVmCompiler
             {
                 segmentPointer = memorySegmentArgumentStart;
             }
-            else if (segment == MemorySegments.This)
+            if (segment == MemorySegments.This || segment == MemorySegments.That)
             {
-                fileStream.WriteLine($"@{memorySegmentThis}");
+                if (segment == MemorySegments.This)
+                {
+                    fileStream.WriteLine($"@{memorySegmentThis}");
+                }
+                else
+                {
+                    fileStream.WriteLine($"@{memorySegmentThat}");
+                }
                 fileStream.WriteLine($"D=M");
                 fileStream.WriteLine($"@{index}");
-                fileStream.WriteLine($"D=D+M");
-                return;
-            }
-            else if (segment == MemorySegments.That)
-            {
-                fileStream.WriteLine($"@{memorySegmentThat}");
-                fileStream.WriteLine($"D=M");
-                fileStream.WriteLine($"@{index}");
-                fileStream.WriteLine($"D=D+M");
-                return;
+                fileStream.WriteLine($"A=D+A");
             }
             else if (segment == MemorySegments.Temp)
             {
@@ -107,8 +105,11 @@ namespace HackVmCompiler
             {
                 segmentPointer = memorySegmentThis;
             }
+            if (segment != MemorySegments.This && segment != MemorySegments.That)
+            {
+                fileStream.WriteLine($"@{segmentPointer + index}");
+            }
 
-            fileStream.WriteLine($"@{segmentPointer + index}");
             fileStream.WriteLine($"D=M");
         }
 
