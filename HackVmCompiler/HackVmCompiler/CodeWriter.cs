@@ -45,6 +45,15 @@ namespace HackVmCompiler
             {
                 fileStream.WriteLine("M=M-D");
             }
+            else if (command == ArithmeticCommands.eq)
+            {
+                fileStream.WriteLine("D=D-M");
+                fileStream.WriteLine("@SETRESULT1");
+                fileStream.WriteLine("D;JEQ");
+                PushValueOnStack(0);
+                fileStream.WriteLine("(SETRESULT1)");
+                PushValueOnStack(1);
+            }
         }
 
         public void WritePushPop(CommandTypes command, MemorySegments segment, int index)
