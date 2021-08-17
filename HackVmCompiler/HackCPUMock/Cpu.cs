@@ -62,7 +62,7 @@ namespace HackCPUMock
         {
             get
             {
-                return RAM[RAM[0]];
+                return RAM[RAM[0] - 1];
             }
         }
 

@@ -48,11 +48,17 @@ namespace HackVmCompiler
             else if (command == ArithmeticCommands.eq)
             {
                 fileStream.WriteLine("D=D-M");
+                DecreaseStackPointer();
                 fileStream.WriteLine("@SETRESULT1");
                 fileStream.WriteLine("D;JEQ");
                 PushValueOnStack(0);
+                IncreaseStackPointer();
+                fileStream.WriteLine("@SETRESULTEND");
+                fileStream.WriteLine("0;JMP");
                 fileStream.WriteLine("(SETRESULT1)");
                 PushValueOnStack(1);
+                IncreaseStackPointer();
+                fileStream.WriteLine("(SETRESULTEND)");
             }
         }
 
