@@ -73,5 +73,70 @@ D=A+D
 
             Assert.AreEqual(26, cpu.D);
         }
+
+        [TestMethod]
+        public void SymbolTest()
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(
+@"@1
+(START)
+@2
+@START
+D=A
+(OTHERLABLE)
+@3
+@4
+@OTHERLABLE
+") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            while (true)
+            {
+                if (!cpu.Step()) break;
+            }
+
+            Assert.AreEqual(5, cpu.A);
+            Assert.AreEqual(1, cpu.D);
+        }
+
+        [TestMethod]
+        public void JumpTest()
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(
+@"@1
+(START)
+@2
+@3
+@END
+0;JMP
+@4
+@5
+@6
+@7
+(END)
+") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            int loopCounter = 0;
+
+            while (true)
+            {
+                cpu.Step();
+                if (cpu.PC > 20) break;
+                loopCounter++;
+            }
+
+            Assert.AreEqual(5, loopCounter);
+        }
     }
 }

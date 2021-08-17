@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 
 namespace HackCPUMock
 {
     public class Cpu
     {
         private readonly IFileSystem _fileSystem;
+        private Dictionary<string, int> _symbolTable;
 
         public Cpu(IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
             RAM[0] = 256;
+            _symbolTable = new Dictionary<string, int>();
         }
 
         public void ReadAsm(string path)
@@ -24,6 +28,15 @@ namespace HackCPUMock
                 string cmd = reader.ReadLine();
                 Programm[pcIndex] = cmd;
                 pcIndex++;
+            }
+            for (int instructionIndex = 0; instructionIndex < pcIndex; instructionIndex++)
+            {
+                var instruction = Programm[instructionIndex];
+
+                if (Programm[instructionIndex].StartsWith("("))
+                {
+                    AddSymbol(instruction, instructionIndex);
+                }
             }
         }
 
@@ -53,6 +66,10 @@ namespace HackCPUMock
             {
                 HandleAInstruction();
             }
+            else if (Instruction.StartsWith("("))
+            {
+                // lable found
+            }
             else
             {
                 HandleCInstruction();
@@ -61,12 +78,61 @@ namespace HackCPUMock
             return true;
         }
 
+        private void AddSymbol(string instruction, int instructionIndex)
+        {
+            var symbol = instruction.TrimStart('(').TrimEnd(')');
+            _symbolTable.Add(symbol, instructionIndex);
+        }
+
         private void HandleCInstruction()
         {
             if (Instruction.Contains("="))
             {
                 HandleAssignment();
             }
+            else if (Instruction.Contains(";"))
+            {
+                HandleJump();
+            }
+        }
+
+        private void HandleJump()
+        {
+            string[] parts = Instruction.Split(";");
+            var jumpValueContainer = parts[0];
+            var jumpCompare = parts[1];
+            bool doJump = false;
+            int jumpValue = 0;
+            if (jumpValueContainer == "A")
+            {
+                jumpValue = A;
+            }
+            else if (jumpValueContainer == "D")
+            {
+                jumpValue = D;
+            }
+            else if (jumpValueContainer == "M")
+            {
+                jumpValue = RAM[A];
+            }
+
+            if (jumpCompare == "JGT")
+            {
+                doJump = jumpValue > 0;
+            }
+            else if (jumpCompare == "JLT")
+            {
+                doJump = jumpValue < 0;
+            }
+            else if (jumpCompare == "JEQ")
+            {
+                doJump = jumpValue == 0;
+            }
+            else if (jumpCompare == "JMP")
+            {
+                doJump = true;
+            }
+            if (doJump) PC = A - 1;
         }
 
         private void HandleAssignment()
@@ -108,17 +174,25 @@ namespace HackCPUMock
 
         private void HandleAInstruction()
         {
-            if (Instruction == ("@SP"))
+            var instructionPayload = Instruction.TrimStart('@');
+
+            if (instructionPayload == "SP")
             {
                 A = 0;
             }
-            else if (Instruction.StartsWith("@R"))
+            else if (instructionPayload == "R13" || instructionPayload == "R14" || instructionPayload == "R15")
             {
-                A = int.Parse(Instruction.Replace("@R", ""));
+                A = int.Parse(Instruction.TrimStart('R'));
+            }
+            else if (instructionPayload.All(char.IsDigit))
+            {
+                A = int.Parse(instructionPayload);
             }
             else
             {
-                A = int.Parse(Instruction.TrimStart('@'));
+                // handle lable ie @LOOP sets to where in which line
+                // of the asm code (LOOP) appears
+                A = _symbolTable[instructionPayload];
             }
         }
 
