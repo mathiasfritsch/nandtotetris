@@ -34,8 +34,12 @@ namespace HackVmCompiler
         public void WriteArithmetic(ArithmeticCommands command)
 
         {
+            fileStream.WriteLine("//WriteArithmetic");
+            fileStream.WriteLine("//Stack to D");
             StackToD();
+            fileStream.WriteLine("//DecreaseStackPointer");
             DecreaseStackPointer();
+            fileStream.WriteLine("//StackToM");
             StackToM();
             if (command == ArithmeticCommands.add)
             {
@@ -44,6 +48,17 @@ namespace HackVmCompiler
             else if (command == ArithmeticCommands.sub)
             {
                 fileStream.WriteLine("M=M-D");
+            }
+            else if (command == ArithmeticCommands.eq)
+            {
+                fileStream.WriteLine("//command eq");
+                fileStream.WriteLine("D=D-M");
+                DecreaseStackPointer();
+                fileStream.WriteLine("@SETRESULT1");
+                fileStream.WriteLine("D;JEQ");
+                PushValueOnStack(0);
+                fileStream.WriteLine("(SETRESULT1)");
+                PushValueOnStack(1);
             }
         }
 
@@ -115,13 +130,13 @@ namespace HackVmCompiler
 
         private void IncreaseStackPointer()
         {
-            fileStream.WriteLine($"A={(int)Pointer.Stack}");
+            fileStream.WriteLine($"@SP");
             fileStream.WriteLine("M=M+1");
         }
 
         private void DecreaseStackPointer()
         {
-            fileStream.WriteLine($"A={(int)Pointer.Stack}");
+            fileStream.WriteLine($"@SP");
             fileStream.WriteLine("M=M-1");
         }
 
@@ -129,7 +144,7 @@ namespace HackVmCompiler
         {
             fileStream.WriteLine($"@{valueToPush}");
             fileStream.WriteLine("D=A");
-            fileStream.WriteLine($"A={(int)Pointer.Stack}");
+            fileStream.WriteLine("@SP");
             fileStream.WriteLine("A=M");
             fileStream.WriteLine("M=D");
         }
@@ -190,7 +205,7 @@ namespace HackVmCompiler
 
         private void StackToM()
         {
-            fileStream.WriteLine($"@{(int)Pointer.Stack}");
+            fileStream.WriteLine($"@SP");
             fileStream.WriteLine("A=M-1");
         }
 

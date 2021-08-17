@@ -58,6 +58,22 @@ namespace HackCPUMock
             }
         }
 
+        public int Stack
+        {
+            get
+            {
+                return RAM[RAM[0]];
+            }
+        }
+
+        public int M
+        {
+            get
+            {
+                return RAM[A];
+            }
+        }
+
         public bool Step()
         {
             if (string.IsNullOrEmpty(Instruction)) return false;
