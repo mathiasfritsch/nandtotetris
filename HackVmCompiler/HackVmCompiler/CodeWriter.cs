@@ -34,12 +34,8 @@ namespace HackVmCompiler
         public void WriteArithmetic(ArithmeticCommands command)
 
         {
-            fileStream.WriteLine("//WriteArithmetic");
-            fileStream.WriteLine("//Stack to D");
             StackToD();
-            fileStream.WriteLine("//DecreaseStackPointer");
             DecreaseStackPointer();
-            fileStream.WriteLine("//StackToM");
             StackToM();
             if (command == ArithmeticCommands.add)
             {
@@ -51,9 +47,7 @@ namespace HackVmCompiler
             }
             else if (command == ArithmeticCommands.eq)
             {
-                fileStream.WriteLine("//command eq");
                 fileStream.WriteLine("D=D-M");
-                DecreaseStackPointer();
                 fileStream.WriteLine("@SETRESULT1");
                 fileStream.WriteLine("D;JEQ");
                 PushValueOnStack(0);
