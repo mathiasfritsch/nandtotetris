@@ -131,12 +131,12 @@ D=A
 
             while (true)
             {
-                cpu.Step();
-                if (cpu.PC > 20) break;
+                var result = cpu.Step();
+                if (!result || cpu.PC > 20) break;
                 loopCounter++;
             }
 
-            Assert.AreEqual(5, loopCounter);
+            Assert.AreEqual(7, loopCounter);
         }
     }
 }
