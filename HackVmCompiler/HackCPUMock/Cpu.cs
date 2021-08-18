@@ -170,6 +170,14 @@ namespace HackCPUMock
                 {
                     valueToAssign -= secondValue;
                 }
+                else if (operation == '&')
+                {
+                    valueToAssign &= secondValue;
+                }
+                else if (operation == '|')
+                {
+                    valueToAssign |= secondValue;
+                }
             }
 
             if (target == "D") D = valueToAssign;
@@ -198,7 +206,7 @@ namespace HackCPUMock
             }
             else if (instructionPayload == "R13" || instructionPayload == "R14" || instructionPayload == "R15")
             {
-                A = int.Parse(Instruction.TrimStart('R'));
+                A = int.Parse(instructionPayload.TrimStart('R'));
             }
             else if (instructionPayload.All(char.IsDigit))
             {
