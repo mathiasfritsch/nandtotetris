@@ -157,9 +157,11 @@ namespace HackCPUMock
             string target = parts[0];
             string source = parts[1];
 
-            int valueToAssign = GetValueFromRegisterOrMemory(source[0]);
+            int valueToAssign = 0;
             if (source.Length == 3)
             {
+                valueToAssign = GetValueFromRegisterOrMemory(source[0]);
+
                 char operation = source[1];
                 int secondValue = GetValueFromRegisterOrMemory(source[2]);
                 if (operation == '+')
@@ -170,8 +172,28 @@ namespace HackCPUMock
                 {
                     valueToAssign -= secondValue;
                 }
+                else if (operation == '&')
+                {
+                    valueToAssign &= secondValue;
+                }
+                else if (operation == '|')
+                {
+                    valueToAssign |= secondValue;
+                }
             }
-
+            else if (source.Length == 2)
+            {
+                char operation = source[0];
+                int secondValue = GetValueFromRegisterOrMemory(source[1]);
+                if (operation == '-')
+                {
+                    valueToAssign = -1 * secondValue;
+                }
+            }
+            else
+            {
+                valueToAssign = GetValueFromRegisterOrMemory(source[0]);
+            }
             if (target == "D") D = valueToAssign;
             else if (target == "A") A = valueToAssign;
             else if (target == "M") RAM[A] = valueToAssign;
@@ -198,7 +220,7 @@ namespace HackCPUMock
             }
             else if (instructionPayload == "R13" || instructionPayload == "R14" || instructionPayload == "R15")
             {
-                A = int.Parse(Instruction.TrimStart('R'));
+                A = int.Parse(instructionPayload.TrimStart('R'));
             }
             else if (instructionPayload.All(char.IsDigit))
             {

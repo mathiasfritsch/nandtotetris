@@ -15,6 +15,8 @@ namespace HackVmCompiler
         private const int memorySegmentThis = 3;
         private const int memorySegmentThat = 4;
 
+        private int branchingCounter = 0;
+
         public void Close()
         {
             fileStream.Close();
@@ -45,20 +47,34 @@ namespace HackVmCompiler
             {
                 fileStream.WriteLine("M=M-D");
             }
-            else if (command == ArithmeticCommands.eq)
+            else if (command == ArithmeticCommands.eq
+                || command == ArithmeticCommands.gt
+                || command == ArithmeticCommands.lt)
             {
-                fileStream.WriteLine("D=D-M");
+                fileStream.WriteLine("D=M-D");
                 DecreaseStackPointer();
-                fileStream.WriteLine("@SETRESULT1");
-                fileStream.WriteLine("D;JEQ");
+                fileStream.WriteLine($"@SETRESULTTRUE{branchingCounter}");
+                if (command == ArithmeticCommands.eq)
+                {
+                    fileStream.WriteLine("D;JEQ");
+                }
+                else if (command == ArithmeticCommands.gt)
+                {
+                    fileStream.WriteLine("D;JGT");
+                }
+                else if (command == ArithmeticCommands.lt)
+                {
+                    fileStream.WriteLine("D;JLT");
+                }
                 PushValueOnStack(0);
                 IncreaseStackPointer();
-                fileStream.WriteLine("@SETRESULTEND");
+                fileStream.WriteLine($"@SETRESULTEND{branchingCounter}");
                 fileStream.WriteLine("0;JMP");
-                fileStream.WriteLine("(SETRESULT1)");
+                fileStream.WriteLine($"(SETRESULTTRUE{branchingCounter})");
                 PushValueOnStack(1);
                 IncreaseStackPointer();
-                fileStream.WriteLine("(SETRESULTEND)");
+                fileStream.WriteLine($"(SETRESULTEND{branchingCounter})");
+                branchingCounter++;
             }
         }
 

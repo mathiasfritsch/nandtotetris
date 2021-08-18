@@ -52,6 +52,26 @@ M=D
         }
 
         [TestMethod]
+        public void MinusATest()
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(@"@21
+D=-A") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            while (true)
+            {
+                if (!cpu.Step()) break;
+            }
+
+            Assert.AreEqual(-21, cpu.D);
+        }
+
+        [TestMethod]
         public void AddTest()
         {
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
@@ -72,6 +92,60 @@ D=A+D
             }
 
             Assert.AreEqual(26, cpu.D);
+        }
+
+        [TestMethod]
+        public void AndTest()
+        {
+            //1001
+            //0011
+            //0001
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(@"@5
+D=A
+@3
+D=A&D
+") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            while (true)
+            {
+                if (!cpu.Step()) break;
+            }
+
+            Assert.AreEqual(1, cpu.D);
+        }
+
+        [TestMethod]
+        public void OrTest()
+        {
+            //1001
+            //0010
+            //1011
+
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(@"@5
+D=A
+@2
+D=A|D
+") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            while (true)
+            {
+                if (!cpu.Step()) break;
+            }
+
+            Assert.AreEqual(7, cpu.D);
         }
 
         [TestMethod]
