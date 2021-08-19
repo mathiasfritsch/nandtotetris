@@ -189,6 +189,10 @@ namespace HackCPUMock
                 {
                     valueToAssign = -1 * secondValue;
                 }
+                else if (operation == '!')
+                {
+                    valueToAssign = ~secondValue;
+                }
             }
             else
             {

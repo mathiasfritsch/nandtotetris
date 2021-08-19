@@ -52,6 +52,26 @@ M=D
         }
 
         [TestMethod]
+        public void NotATest()
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(@"@0
+D=!A") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            while (true)
+            {
+                if (!cpu.Step()) break;
+            }
+
+            Assert.AreEqual(-1, cpu.D);
+        }
+
+        [TestMethod]
         public void MinusATest()
         {
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>

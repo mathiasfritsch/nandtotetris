@@ -73,6 +73,19 @@ gt",
         }
 
         [TestMethod]
+        public void TestNot()
+        {
+            var cpu = TestHelper.CompileVmAndRunOnCpu(
+    $@"push constant 0
+not",
+            new Dictionary<int, int>
+            {
+                               {0,256}
+            });
+            Assert.AreEqual(-1, cpu.Stack);
+        }
+
+        [TestMethod]
         public void TestMulipleEq()
         {
             var cpu = TestHelper.CompileVmAndRunOnCpu(

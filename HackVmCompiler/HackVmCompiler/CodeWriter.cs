@@ -37,6 +37,11 @@ namespace HackVmCompiler
 
         {
             StackToD();
+            if (command == ArithmeticCommands.not)
+            {
+                fileStream.WriteLine("M=!D");
+                return;
+            }
             DecreaseStackPointer();
             StackToM();
             if (command == ArithmeticCommands.add)
