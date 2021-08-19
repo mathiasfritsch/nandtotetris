@@ -42,6 +42,11 @@ namespace HackVmCompiler
                 fileStream.WriteLine("M=!D");
                 return;
             }
+            else if (command == ArithmeticCommands.neg)
+            {
+                fileStream.WriteLine("M=-D");
+                return;
+            }
             DecreaseStackPointer();
             StackToM();
             if (command == ArithmeticCommands.add)
@@ -51,6 +56,14 @@ namespace HackVmCompiler
             else if (command == ArithmeticCommands.sub)
             {
                 fileStream.WriteLine("M=M-D");
+            }
+            else if (command == ArithmeticCommands.or)
+            {
+                fileStream.WriteLine("M=M|D");
+            }
+            else if (command == ArithmeticCommands.and)
+            {
+                fileStream.WriteLine("M=M&D");
             }
             else if (command == ArithmeticCommands.eq
                 || command == ArithmeticCommands.gt

@@ -86,6 +86,33 @@ not",
         }
 
         [TestMethod]
+        public void TestNeg()
+        {
+            var cpu = TestHelper.CompileVmAndRunOnCpu(
+    $@"push constant 3
+neg",
+            new Dictionary<int, int>
+            {
+                               {0,256}
+            });
+            Assert.AreEqual(-3, cpu.Stack);
+        }
+
+        [TestMethod]
+        public void TestAnd()
+        {
+            var cpu = TestHelper.CompileVmAndRunOnCpu(
+    $@"push constant 5
+push constant 6
+and",
+            new Dictionary<int, int>
+            {
+                               {0,256}
+            });
+            Assert.AreEqual(4, cpu.Stack);
+        }
+
+        [TestMethod]
         public void TestMulipleEq()
         {
             var cpu = TestHelper.CompileVmAndRunOnCpu(
