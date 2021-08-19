@@ -14,7 +14,8 @@ namespace HackVmCompiler
         private const int memorySegmentTempStart = 5;
         private const int memorySegmentThis = 3;
         private const int memorySegmentThat = 4;
-
+        public static readonly int TrueValue = -1;
+        public static readonly int FalseValue = 0;
         private int branchingCounter = 0;
 
         public void Close()
@@ -42,6 +43,11 @@ namespace HackVmCompiler
                 fileStream.WriteLine("M=!D");
                 return;
             }
+            else if (command == ArithmeticCommands.neg)
+            {
+                fileStream.WriteLine("M=-D");
+                return;
+            }
             DecreaseStackPointer();
             StackToM();
             if (command == ArithmeticCommands.add)
@@ -51,6 +57,14 @@ namespace HackVmCompiler
             else if (command == ArithmeticCommands.sub)
             {
                 fileStream.WriteLine("M=M-D");
+            }
+            else if (command == ArithmeticCommands.or)
+            {
+                fileStream.WriteLine("M=M|D");
+            }
+            else if (command == ArithmeticCommands.and)
+            {
+                fileStream.WriteLine("M=M&D");
             }
             else if (command == ArithmeticCommands.eq
                 || command == ArithmeticCommands.gt
@@ -71,12 +85,12 @@ namespace HackVmCompiler
                 {
                     fileStream.WriteLine("D;JLT");
                 }
-                PushValueOnStack(0);
+                PushValueOnStack(FalseValue);
                 IncreaseStackPointer();
                 fileStream.WriteLine($"@SETRESULTEND{branchingCounter}");
                 fileStream.WriteLine("0;JMP");
                 fileStream.WriteLine($"(SETRESULTTRUE{branchingCounter})");
-                PushValueOnStack(1);
+                PushValueOnStack(TrueValue);
                 IncreaseStackPointer();
                 fileStream.WriteLine($"(SETRESULTEND{branchingCounter})");
                 branchingCounter++;
@@ -163,8 +177,16 @@ namespace HackVmCompiler
 
         private void PushValueOnStack(int valueToPush)
         {
-            fileStream.WriteLine($"@{valueToPush}");
-            fileStream.WriteLine("D=A");
+            if (valueToPush >= -1 && valueToPush <= 1)
+            {
+                fileStream.WriteLine($"D={valueToPush}");
+            }
+            else
+            {
+                fileStream.WriteLine($"@{valueToPush}");
+                fileStream.WriteLine("D=A");
+            }
+
             fileStream.WriteLine("@SP");
             fileStream.WriteLine("A=M");
             fileStream.WriteLine("M=D");

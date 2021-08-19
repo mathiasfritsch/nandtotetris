@@ -10,6 +10,8 @@ namespace HackCPUMock
     {
         private readonly IFileSystem _fileSystem;
         private Dictionary<string, int> _symbolTable;
+        public static readonly int TrueValue = -1;
+        public static readonly int FalseValue = 0;
 
         public Cpu(IFileSystem fileSystem)
         {
