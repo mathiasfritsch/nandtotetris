@@ -15,6 +15,7 @@ namespace HackVmCompiler
         Function,
         Return,
         Call,
-        Comment
+        Comment,
+        IfGoto
     }
 }

@@ -26,12 +26,14 @@ namespace HackVmCompiler
             {
                 var token = currentLine.Split();
 
-                if (Enum.IsDefined(typeof(ArithmeticCommands), token[0]))
+                var enumText = token[0].Remove('-');
+
+                if (Enum.IsDefined(typeof(ArithmeticCommands), enumText))
                 {
-                    ArithmeticCommand = (ArithmeticCommands)Enum.Parse(typeof(ArithmeticCommands), token[0], true);
+                    ArithmeticCommand = (ArithmeticCommands)Enum.Parse(typeof(ArithmeticCommands), enumText, true);
                     CommandType = CommandTypes.Arithmetic;
                 }
-                else CommandType = (CommandTypes)Enum.Parse(typeof(CommandTypes), token[0], true);
+                else CommandType = (CommandTypes)Enum.Parse(typeof(CommandTypes), enumText, true);
 
                 if (token.Length > 1) Arg1 = token[1];
                 if (token.Length > 2) Arg2 = token[2];

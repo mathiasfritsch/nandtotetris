@@ -97,6 +97,18 @@ namespace HackVmCompiler
             }
         }
 
+        public void WriteLabel(string label)
+        {
+        }
+
+        public void WriteGoto(string label)
+        {
+        }
+
+        public void WriteIf(string label)
+        {
+        }
+
         public void WritePushPop(CommandTypes command, MemorySegments segment, int index)
         {
             if (command == CommandTypes.Push)

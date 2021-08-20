@@ -28,7 +28,18 @@ namespace HackVmCompilerRunner
                 {
                     codeWriter.WritePushPop(cmd, parser.MemorySegment, int.Parse(parser.Arg2));
                 }
-
+                else if (cmd == CommandTypes.Goto)
+                {
+                    codeWriter.WriteGoto(parser.Arg1));
+                }
+                else if (cmd == CommandTypes.IfGoto)
+                {
+                    codeWriter.WriteIf(parser.Arg1));
+                }
+                else if (cmd == CommandTypes.Label)
+                {
+                    codeWriter.WriteLabel(parser.Arg1));
+                }
                 if (!parser.HasMoreCommands) break;
             }
             codeWriter.Close();
