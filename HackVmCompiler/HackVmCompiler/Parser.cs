@@ -26,7 +26,7 @@ namespace HackVmCompiler
             {
                 var token = currentLine.Split();
 
-                var enumText = token[0].Remove('-');
+                var enumText = token[0].Replace("-", "");
 
                 if (Enum.IsDefined(typeof(ArithmeticCommands), enumText))
                 {

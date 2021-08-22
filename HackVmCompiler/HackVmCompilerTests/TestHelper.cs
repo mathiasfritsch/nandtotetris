@@ -51,9 +51,9 @@ namespace HackVmCompilerTests
                 {
                     codeWriter.WriteGoto(parser.Arg1);
                 }
-                else if (cmd == CommandTypes.)
+                else if (cmd == CommandTypes.IfGoto)
                 {
-                    codeWriter.WriteGoto(parser.Arg1);
+                    codeWriter.WriteIf(parser.Arg1);
                 }
                 if (!parser.HasMoreCommands) break;
             }
