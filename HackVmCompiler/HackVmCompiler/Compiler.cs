@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.IO;
+using System.IO.Abstractions;
 
 namespace HackVmCompiler
 {
@@ -23,10 +24,16 @@ namespace HackVmCompiler
             var codeWriter = new CodeWriter(fileSystem);
 
             parser.SetFile(sourcePath);
-
             codeWriter.SetFile(targetPath);
+            var pdbFile = targetPath.Replace(".asm", ".pdb");
+
+            fileSystem.File.Delete(pdbFile);
+            using StreamWriter fileStreamPdb = fileSystem.FileInfo.FromFileName(pdbFile).CreateText();
+            int lineVm = 0;
+
             while (true)
             {
+                fileStreamPdb.WriteLine($@"lineVm:{PrettyNumber(lineVm)} lineAsm:{PrettyNumber(codeWriter.AsmLineIndex)}");
                 parser.Advance();
                 var cmd = parser.CommandType;
                 if (cmd == CommandTypes.Arithmetic)
@@ -49,9 +56,13 @@ namespace HackVmCompiler
                 {
                     codeWriter.WriteLabel(parser.Arg1);
                 }
+
                 if (!parser.HasMoreCommands) break;
+                lineVm++;
             }
             codeWriter.Close();
         }
+
+        private string PrettyNumber(int number) => number.ToString("000");
     }
 }

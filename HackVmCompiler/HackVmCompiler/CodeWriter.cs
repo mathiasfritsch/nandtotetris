@@ -18,6 +18,8 @@ namespace HackVmCompiler
         public static readonly int FalseValue = 0;
         private int branchingCounter = 0;
 
+        public int AsmLineIndex { private set; get; }
+
         public void Close()
         {
             fileStream.Close();
@@ -26,6 +28,7 @@ namespace HackVmCompiler
         public CodeWriter(IFileSystem fileSystem)
         {
             this.fileSystem = fileSystem;
+            AsmLineIndex = 0;
         }
 
         public void SetFile(string fileName)
@@ -40,80 +43,80 @@ namespace HackVmCompiler
             StackToD();
             if (command == ArithmeticCommands.not)
             {
-                fileStream.WriteLine("M=!D");
+                WriteAsmCommand("M=!D");
                 return;
             }
             else if (command == ArithmeticCommands.neg)
             {
-                fileStream.WriteLine("M=-D");
+                WriteAsmCommand("M=-D");
                 return;
             }
             DecreaseStackPointer();
             StackToM();
             if (command == ArithmeticCommands.add)
             {
-                fileStream.WriteLine("M=M+D");
+                WriteAsmCommand("M=M+D");
             }
             else if (command == ArithmeticCommands.sub)
             {
-                fileStream.WriteLine("M=M-D");
+                WriteAsmCommand("M=M-D");
             }
             else if (command == ArithmeticCommands.or)
             {
-                fileStream.WriteLine("M=M|D");
+                WriteAsmCommand("M=M|D");
             }
             else if (command == ArithmeticCommands.and)
             {
-                fileStream.WriteLine("M=M&D");
+                WriteAsmCommand("M=M&D");
             }
             else if (command == ArithmeticCommands.eq
                 || command == ArithmeticCommands.gt
                 || command == ArithmeticCommands.lt)
             {
-                fileStream.WriteLine("D=M-D");
+                WriteAsmCommand("D=M-D");
                 DecreaseStackPointer();
-                fileStream.WriteLine($"@SETRESULTTRUE{branchingCounter}");
+                WriteAsmCommand($"@SETRESULTTRUE{branchingCounter}");
                 if (command == ArithmeticCommands.eq)
                 {
-                    fileStream.WriteLine("D;JEQ");
+                    WriteAsmCommand("D;JEQ");
                 }
                 else if (command == ArithmeticCommands.gt)
                 {
-                    fileStream.WriteLine("D;JGT");
+                    WriteAsmCommand("D;JGT");
                 }
                 else if (command == ArithmeticCommands.lt)
                 {
-                    fileStream.WriteLine("D;JLT");
+                    WriteAsmCommand("D;JLT");
                 }
                 PushValueOnStack(FalseValue);
                 IncreaseStackPointer();
-                fileStream.WriteLine($"@SETRESULTEND{branchingCounter}");
-                fileStream.WriteLine("0;JMP");
-                fileStream.WriteLine($"(SETRESULTTRUE{branchingCounter})");
+                WriteAsmCommand($"@SETRESULTEND{branchingCounter}");
+                WriteAsmCommand("0;JMP");
+                WriteAsmCommand($"(SETRESULTTRUE{branchingCounter})");
                 PushValueOnStack(TrueValue);
                 IncreaseStackPointer();
-                fileStream.WriteLine($"(SETRESULTEND{branchingCounter})");
+                WriteAsmCommand($"(SETRESULTEND{branchingCounter})");
                 branchingCounter++;
             }
         }
 
         public void WriteLabel(string label)
         {
-            fileStream.WriteLine($"({label.ToUpper()})");
+            WriteAsmCommand($"({label.ToUpper()})");
         }
 
         public void WriteGoto(string label)
         {
-            fileStream.WriteLine($"@{label.ToUpper()}");
-            fileStream.WriteLine("0;JMP");
+            WriteAsmCommand($"@{label.ToUpper()}");
+            WriteAsmCommand("0;JMP");
         }
 
         public void WriteIf(string label)
         {
             StackToD();
             DecreaseStackPointer();
-            fileStream.WriteLine($"@{label.ToUpper()}");
-            fileStream.WriteLine($"D;JNE");
+            WriteAsmCommand($"@{label.ToUpper()}");
+            WriteAsmCommand($"D;JNE");
         }
 
         public void WritePushPop(CommandTypes command, MemorySegments segment, int index)
@@ -127,9 +130,9 @@ namespace HackVmCompiler
                 else
                 {
                     GetSegmentValueOnD(segment, index);
-                    fileStream.WriteLine($"@SP");
-                    fileStream.WriteLine("A=M");
-                    fileStream.WriteLine("M=D");
+                    WriteAsmCommand($"@SP");
+                    WriteAsmCommand("A=M");
+                    WriteAsmCommand("M=D");
                 }
 
                 IncreaseStackPointer();
@@ -156,15 +159,15 @@ namespace HackVmCompiler
             {
                 if (segment == MemorySegments.This)
                 {
-                    fileStream.WriteLine($"@{memorySegmentThis}");
+                    WriteAsmCommand($"@{memorySegmentThis}");
                 }
                 else
                 {
-                    fileStream.WriteLine($"@{memorySegmentThat}");
+                    WriteAsmCommand($"@{memorySegmentThat}");
                 }
-                fileStream.WriteLine($"D=M");
-                fileStream.WriteLine($"@{index}");
-                fileStream.WriteLine($"A=D+A");
+                WriteAsmCommand($"D=M");
+                WriteAsmCommand($"@{index}");
+                WriteAsmCommand($"A=D+A");
             }
             else if (segment == MemorySegments.Temp)
             {
@@ -176,39 +179,39 @@ namespace HackVmCompiler
             }
             if (segment != MemorySegments.This && segment != MemorySegments.That)
             {
-                fileStream.WriteLine($"@{segmentPointer + index}");
+                WriteAsmCommand($"@{segmentPointer + index}");
             }
 
-            fileStream.WriteLine($"D=M");
+            WriteAsmCommand($"D=M");
         }
 
         private void IncreaseStackPointer()
         {
-            fileStream.WriteLine($"@SP");
-            fileStream.WriteLine("M=M+1");
+            WriteAsmCommand($"@SP");
+            WriteAsmCommand("M=M+1");
         }
 
         private void DecreaseStackPointer()
         {
-            fileStream.WriteLine($"@SP");
-            fileStream.WriteLine("M=M-1");
+            WriteAsmCommand($"@SP");
+            WriteAsmCommand("M=M-1");
         }
 
         private void PushValueOnStack(int valueToPush)
         {
             if (valueToPush >= -1 && valueToPush <= 1)
             {
-                fileStream.WriteLine($"D={valueToPush}");
+                WriteAsmCommand($"D={valueToPush}");
             }
             else
             {
-                fileStream.WriteLine($"@{valueToPush}");
-                fileStream.WriteLine("D=A");
+                WriteAsmCommand($"@{valueToPush}");
+                WriteAsmCommand("D=A");
             }
 
-            fileStream.WriteLine("@SP");
-            fileStream.WriteLine("A=M");
-            fileStream.WriteLine("M=D");
+            WriteAsmCommand("@SP");
+            WriteAsmCommand("A=M");
+            WriteAsmCommand("M=D");
         }
 
         private void PopValueFromStack(MemorySegments segment, int index)
@@ -216,15 +219,15 @@ namespace HackVmCompiler
             if (segment == MemorySegments.That || segment == MemorySegments.This)
             {
                 if (segment == MemorySegments.This)
-                    fileStream.WriteLine($"@{memorySegmentThis}");
+                    WriteAsmCommand($"@{memorySegmentThis}");
                 else
-                    fileStream.WriteLine($"@{memorySegmentThat}");
+                    WriteAsmCommand($"@{memorySegmentThat}");
 
-                fileStream.WriteLine($"D=M");
-                fileStream.WriteLine($"@{index}");
-                fileStream.WriteLine($"D=D+A");
-                fileStream.WriteLine($"@R13");
-                fileStream.WriteLine($"M=D");
+                WriteAsmCommand($"D=M");
+                WriteAsmCommand($"@{index}");
+                WriteAsmCommand($"D=D+A");
+                WriteAsmCommand($"@R13");
+                WriteAsmCommand($"M=D");
             }
 
             StackToD();
@@ -247,33 +250,39 @@ namespace HackVmCompiler
             }
             if (segment == MemorySegments.That || segment == MemorySegments.This)
             {
-                fileStream.WriteLine($"@R13");
-                fileStream.WriteLine($"A=M");
+                WriteAsmCommand($"@R13");
+                WriteAsmCommand($"A=M");
             }
             else
             {
                 int itemAddress = startSegment + index;
-                fileStream.WriteLine($"@{itemAddress}");
+                WriteAsmCommand($"@{itemAddress}");
             }
 
-            fileStream.WriteLine($"M=D");
+            WriteAsmCommand($"M=D");
         }
 
         private void StackToD()
         {
             StackToM();
-            fileStream.WriteLine("D=M");
+            WriteAsmCommand("D=M");
         }
 
         private void StackToM()
         {
-            fileStream.WriteLine($"@SP");
-            fileStream.WriteLine("A=M-1");
+            WriteAsmCommand($"@SP");
+            WriteAsmCommand("A=M-1");
         }
 
         public void Dispose()
         {
             fileStream.Dispose();
+        }
+
+        private void WriteAsmCommand(string cmd)
+        {
+            fileStream.WriteLine(cmd);
+            AsmLineIndex++;
         }
     }
 }

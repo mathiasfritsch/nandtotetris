@@ -27,6 +27,7 @@ namespace HackVmCompilerTests
                 });
 
             new Compiler(fileSystem, vmFile, asmFile).Run();
+            var pdbContent = fileSystem.File.OpenText(@"C:\loadconstant.pdb").ReadToEnd();
 
             var cpu = new Cpu(fileSystem);
             if (initialData != null)
