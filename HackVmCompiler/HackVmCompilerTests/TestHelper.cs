@@ -26,38 +26,7 @@ namespace HackVmCompilerTests
                     new MockFileData(vmCode) },
                 });
 
-            var parser = new Parser(fileSystem);
-            parser.SetFile(vmFile);
-
-            var codeWriter = new CodeWriter(fileSystem);
-            codeWriter.SetFile(asmFile);
-            while (true)
-            {
-                parser.Advance();
-                var cmd = parser.CommandType;
-                if (cmd == CommandTypes.Arithmetic)
-                {
-                    codeWriter.WriteArithmetic(parser.ArithmeticCommand);
-                }
-                else if (cmd == CommandTypes.Pop || cmd == CommandTypes.Push)
-                {
-                    codeWriter.WritePushPop(cmd, parser.MemorySegment, int.Parse(parser.Arg2));
-                }
-                else if (cmd == CommandTypes.Label)
-                {
-                    codeWriter.WriteLabel(parser.Arg1);
-                }
-                else if (cmd == CommandTypes.Goto)
-                {
-                    codeWriter.WriteGoto(parser.Arg1);
-                }
-                else if (cmd == CommandTypes.IfGoto)
-                {
-                    codeWriter.WriteIf(parser.Arg1);
-                }
-                if (!parser.HasMoreCommands) break;
-            }
-            codeWriter.Dispose();
+            new Compiler(fileSystem, vmFile, asmFile).Run();
 
             var cpu = new Cpu(fileSystem);
             if (initialData != null)
@@ -74,7 +43,7 @@ namespace HackVmCompilerTests
             {
                 if (!cpu.Step()) break;
             }
-            codeWriter.Close();
+
             return cpu;
         }
     }
