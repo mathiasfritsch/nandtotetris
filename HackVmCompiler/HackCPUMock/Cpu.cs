@@ -146,6 +146,10 @@ namespace HackCPUMock
             {
                 doJump = jumpValue == 0;
             }
+            else if (jumpCompare == "JNE")
+            {
+                doJump = jumpValue != 0;
+            }
             else if (jumpCompare == "JMP")
             {
                 doJump = true;

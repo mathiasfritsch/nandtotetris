@@ -111,9 +111,9 @@ namespace HackVmCompiler
         public void WriteIf(string label)
         {
             StackToD();
-            fileStream.WriteLine($"@{label.ToUpper()}");
-            fileStream.WriteLine($"D;JEQ");
             DecreaseStackPointer();
+            fileStream.WriteLine($"@{label.ToUpper()}");
+            fileStream.WriteLine($"D;JNE");
         }
 
         public void WritePushPop(CommandTypes command, MemorySegments segment, int index)

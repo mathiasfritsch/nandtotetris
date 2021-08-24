@@ -11,6 +11,49 @@ namespace HackVmCompilerTests
     public class ProgrammFlowTests
     {
         [TestMethod]
+        public void GotoTest()
+        {
+            var cpu = TestHelper.CompileVmAndRunOnCpu(
+             @"goto FIRSTLABEL
+push constant 1
+goto ENDLABEL
+label FIRSTLABEL
+push constant 2
+label ENDLABEL",
+
+             new Dictionary<int, int>
+             {
+                { TestHelper.Stack,256}
+             });
+
+            Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
+            Assert.AreEqual(2, cpu.RAM[256]);
+        }
+
+        [TestMethod]
+        [DataRow(0, 1)]
+        [DataRow(1, 2)]
+        public void IfGotoTest(int conditionValue, int expextedResult)
+        {
+            var cpu = TestHelper.CompileVmAndRunOnCpu(
+             $@"push constant {conditionValue}
+if-goto FIRSTLABEL
+push constant 1
+goto ENDLABEL
+label FIRSTLABEL
+push constant 2
+label ENDLABEL",
+
+             new Dictionary<int, int>
+             {
+                { TestHelper.Stack,256}
+             });
+
+            Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
+            Assert.AreEqual(expextedResult, cpu.RAM[256]);
+        }
+
+        [TestMethod]
         public void BasicLoop()
         {
             var cpu = TestHelper.CompileVmAndRunOnCpu(
