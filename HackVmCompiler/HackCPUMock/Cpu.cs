@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -76,8 +77,15 @@ namespace HackCPUMock
             }
         }
 
+        private void TraceStep(bool isInitialTrace = false)
+        {
+            Trace.WriteLine($"{(isInitialTrace ? "" : Instruction),-15} PC:{PC,5} A:{A,5} D:{D,5} M:{M,5} Stack:{Stack,5} SP:{RAM[0],5} argument 0:{RAM[400],5}");
+        }
+
         public bool Step()
         {
+            if (PC == 0) TraceStep(true);
+
             if (string.IsNullOrEmpty(Instruction)) return false;
 
             if (Instruction.StartsWith("@"))
@@ -92,6 +100,8 @@ namespace HackCPUMock
             {
                 HandleCInstruction();
             }
+
+            TraceStep();
             PC++;
             return true;
         }

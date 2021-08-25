@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,7 +57,7 @@ label ENDLABEL",
         [TestMethod]
         public void BasicLoop()
         {
-            var cpu = TestHelper.CompileVmAndRunOnCpu(
+            var testResult = TestHelper.CompileVmAndRunOnCpu(
              @"push constant 0
 pop local 0
 label LOOP_START
@@ -77,10 +78,12 @@ push local 0",
                 { TestHelper.Local,300},
                 { TestHelper.Argument,400},
                 { 400,3}
-             }).Cpu;
+             });
+            var cpu = testResult.Cpu;
+            var pdb = testResult.FileSystem.File.OpenText(@"C:\loadconstant.pdb").ReadToEnd();
 
             Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
-            Assert.AreEqual(6, cpu.RAM[257]);
+            Assert.AreEqual(6, cpu.RAM[256]);
         }
     }
 }
