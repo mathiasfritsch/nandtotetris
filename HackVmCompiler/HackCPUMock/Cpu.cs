@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -78,6 +79,8 @@ namespace HackCPUMock
 
         public bool Step()
         {
+            Trace.WriteLine($"PC:{PC} A:{A} D:{D} M:{M} Stack:{Stack} SP:{RAM[0]} argument 0:{RAM[400]}");
+
             if (string.IsNullOrEmpty(Instruction)) return false;
 
             if (Instruction.StartsWith("@"))
