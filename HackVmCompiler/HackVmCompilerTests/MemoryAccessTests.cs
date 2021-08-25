@@ -9,7 +9,7 @@ namespace HackVmCompilerTests
         [TestMethod]
         public void PushTest()
         {
-            var cpu = TestHelper.CompileVmAndRunOnCpu(@"push constant 5");
+            var cpu = TestHelper.CompileVmAndRunOnCpu(@"push constant 5").Cpu;
             Assert.AreEqual(5, cpu.RAM[256]);
         }
 
@@ -49,7 +49,7 @@ add",
                     {2,400},
                     {3,3000 },
                     {4,3010 }
-                });
+                }).Cpu;
 
             Assert.AreEqual(472, cpu.RAM[256]);
             Assert.AreEqual(10, cpu.RAM[300]);
@@ -71,7 +71,7 @@ add",
                     { 3,3030},
                     { 0,257},
                     { 256,241}
-                });
+                }).Cpu;
 
             Assert.AreEqual(241, cpu.RAM[3036]);
         }
@@ -86,7 +86,7 @@ add",
                     { 3,3030},
                     { 5,3030},
                     { 3035,305}
-                });
+                }).Cpu;
 
             Assert.AreEqual(305, cpu.RAM[256]);
             Assert.AreEqual(257, cpu.RAM[0]);

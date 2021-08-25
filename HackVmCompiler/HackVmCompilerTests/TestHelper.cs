@@ -1,8 +1,6 @@
 ﻿using HackCPUMock;
 using HackVmCompiler;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 
 namespace HackVmCompilerTests
@@ -15,7 +13,7 @@ namespace HackVmCompilerTests
         public static readonly int This = 3;
         public static readonly int That = 4;
 
-        public static Cpu CompileVmAndRunOnCpu(string vmCode, Dictionary<int, int> initialData = null)
+        public static CompilerTestResult CompileVmAndRunOnCpu(string vmCode, Dictionary<int, int> initialData = null)
         {
             string vmFile = @"C:\somefile.vm";
             string asmFile = @"C:\loadconstant.asm";
@@ -27,7 +25,6 @@ namespace HackVmCompilerTests
                 });
 
             new Compiler(fileSystem, vmFile, asmFile).Run();
-            var pdbContent = fileSystem.File.OpenText(@"C:\loadconstant.pdb").ReadToEnd();
 
             var cpu = new Cpu(fileSystem);
             if (initialData != null)
@@ -45,7 +42,7 @@ namespace HackVmCompilerTests
                 if (!cpu.Step()) break;
             }
 
-            return cpu;
+            return new CompilerTestResult { Cpu = cpu, FileSystem = fileSystem };
         }
     }
 }

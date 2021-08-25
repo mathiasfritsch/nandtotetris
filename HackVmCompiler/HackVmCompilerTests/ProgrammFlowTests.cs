@@ -24,7 +24,7 @@ label ENDLABEL",
              new Dictionary<int, int>
              {
                 { TestHelper.Stack,256}
-             });
+             }).Cpu;
 
             Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
             Assert.AreEqual(2, cpu.RAM[256]);
@@ -47,7 +47,7 @@ label ENDLABEL",
              new Dictionary<int, int>
              {
                 { TestHelper.Stack,256}
-             });
+             }).Cpu;
 
             Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
             Assert.AreEqual(expextedResult, cpu.RAM[256]);
@@ -77,7 +77,7 @@ push local 0",
                 { TestHelper.Local,300},
                 { TestHelper.Argument,400},
                 { 400,3}
-             });
+             }).Cpu;
 
             Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
             Assert.AreEqual(6, cpu.RAM[257]);

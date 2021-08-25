@@ -19,7 +19,7 @@ add",
     new Dictionary<int, int>
     {
                        {0,256}
-    });
+    }).Cpu;
 
             Assert.AreEqual(15, cpu.Stack);
         }
@@ -69,7 +69,7 @@ not",
     new Dictionary<int, int>
     {
                        {0,256}
-    });
+    }).Cpu;
 
             Assert.AreEqual(266, cpu.RAM[0]);
             Assert.AreEqual(-1, cpu.RAM[256]);
@@ -96,7 +96,7 @@ eq",
     new Dictionary<int, int>
     {
                        {0,256}
-    });
+    }).Cpu;
 
             Assert.AreEqual(result, cpu.Stack);
         }
@@ -114,7 +114,7 @@ lt",
             new Dictionary<int, int>
             {
                                {0,256}
-            });
+            }).Cpu;
             Assert.AreEqual(result, cpu.Stack);
         }
 
@@ -131,7 +131,7 @@ gt",
             new Dictionary<int, int>
             {
                                {0,256}
-            });
+            }).Cpu;
             Assert.AreEqual(result, cpu.Stack);
         }
 
@@ -144,7 +144,7 @@ not",
             new Dictionary<int, int>
             {
                                {0,256}
-            });
+            }).Cpu;
             Assert.AreEqual(-1, cpu.Stack);
         }
 
@@ -157,7 +157,7 @@ neg",
             new Dictionary<int, int>
             {
                                {0,256}
-            });
+            }).Cpu;
             Assert.AreEqual(-3, cpu.Stack);
         }
 
@@ -171,7 +171,7 @@ and",
             new Dictionary<int, int>
             {
                                {0,256}
-            });
+            }).Cpu;
             Assert.AreEqual(4, cpu.Stack);
         }
 
@@ -196,7 +196,7 @@ pop this 3
     {
                     { 3,3030},
                      {0,256}
-    });
+    }).Cpu;
 
             Assert.AreEqual(FalseValue, cpu.RAM[3031]);
             Assert.AreEqual(TrueValue, cpu.RAM[3032]);
