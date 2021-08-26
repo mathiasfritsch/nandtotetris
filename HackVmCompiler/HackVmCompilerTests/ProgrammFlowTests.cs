@@ -55,7 +55,58 @@ label ENDLABEL",
         }
 
         [TestMethod]
+        public void FibonacciSeries()
+        {
+            var testResult = TestHelper.CompileVmAndRunOnCpu(
+                @"push argument 1
+pop pointer 1
+push constant 0
+pop that 0
+push constant 1
+pop that 1
+push argument 0
+push constant 2
+sub
+pop argument 0
+label MAIN_LOOP_START
+push argument 0
+if-goto COMPUTE_ELEMENT
+goto END_PROGRAM
+label COMPUTE_ELEMENT
+push that 0
+push that 1
+add
+pop that 2
+push pointer 1
+push constant 1
+add
+pop pointer 1
+push argument 0
+push constant 1
+sub
+pop argument 0
+goto MAIN_LOOP_START
+label END_PROGRAM",
+        new Dictionary<int, int>
+             {
+                { TestHelper.Stack,256},
+                { TestHelper.Local,300},
+                { TestHelper.Argument,400},
+                { 400,6},
+                { 401,3000}
+             });
+            var cpu = testResult.Cpu;
+            Assert.AreEqual(0, cpu.RAM[3000]);
+            Assert.AreEqual(1, cpu.RAM[3001]);
+            Assert.AreEqual(1, cpu.RAM[3002]);
+            Assert.AreEqual(2, cpu.RAM[3003]);
+            Assert.AreEqual(3, cpu.RAM[3004]);
+            Assert.AreEqual(5, cpu.RAM[3005]);
+        }
+
+        [TestMethod]
         public void BasicLoop()
+
         {
             var testResult = TestHelper.CompileVmAndRunOnCpu(
              @"push constant 0
