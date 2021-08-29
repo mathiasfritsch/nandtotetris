@@ -8,6 +8,8 @@ namespace HackVmCompiler
     {
         private StreamWriter fileStream;
         private readonly IFileSystem fileSystem;
+        private string className = "main";
+        private string methodName = "main";
 
         private const int memorySegmentLocalStart = 300;
         private const int memorySegmentArgumentStart = 400;
@@ -89,15 +91,151 @@ namespace HackVmCompiler
                     WriteAsmCommand("D;JLT");
                 }
                 PushValueOnStack(FalseValue);
-                IncreaseStackPointer();
                 WriteAsmCommand($"@SETRESULTEND{branchingCounter}");
                 WriteAsmCommand("0;JMP");
                 WriteAsmCommand($"(SETRESULTTRUE{branchingCounter})");
                 PushValueOnStack(TrueValue);
-                IncreaseStackPointer();
                 WriteAsmCommand($"(SETRESULTEND{branchingCounter})");
                 branchingCounter++;
             }
+        }
+
+        public void WriteReturn()
+        {
+            //FRAME = LCL
+            WriteAsmCommand("@1");
+            WriteAsmCommand("D=M");
+
+            //Return = FRAME-5
+            WriteAsmCommand("@5");
+            WriteAsmCommand("D=D-A");
+            WriteAsmCommand("A=D");
+            WriteAsmCommand("D=M");
+            WriteAsmCommand("@R15");
+            WriteAsmCommand("M=D");
+
+            // return value on argument 0
+            PopValueFromStack(MemorySegments.Argument, 0);
+
+            // SP = arg + 1
+            WriteAsmCommand("@2");
+            WriteAsmCommand("D=M+1");
+            WriteAsmCommand("@SP");
+            WriteAsmCommand("M=D");
+
+            //that = FRAME-1
+            WriteAsmCommand("@1");
+            WriteAsmCommand("D=M-1");
+            WriteAsmCommand("@4");
+            WriteAsmCommand("M=D");
+
+            //this = FRAME-2
+            WriteAsmCommand("@1");
+            WriteAsmCommand("D=M");
+            WriteAsmCommand("@2");
+            WriteAsmCommand("D=D-A");
+            WriteAsmCommand("@3");
+            WriteAsmCommand("M=D");
+
+            //arg = FRAME-3
+            WriteAsmCommand("@1");
+            WriteAsmCommand("D=M");
+            WriteAsmCommand("@3");
+            WriteAsmCommand("D=D-A");
+            WriteAsmCommand("@2");
+            WriteAsmCommand("M=D");
+
+            //local = FRAME-4
+            WriteAsmCommand("@1");
+            WriteAsmCommand("D=M");
+            WriteAsmCommand("@4");
+            WriteAsmCommand("D=D-A");
+            WriteAsmCommand("@1");
+            WriteAsmCommand("M=D");
+
+            //Return
+            WriteAsmCommand("@R15");
+            WriteAsmCommand("A=M");
+            WriteAsmCommand("0;JMP");
+        }
+
+        public void WriteFunction(string functionName, int lclVariables)
+        {
+            string thisFunction = $"{className}&{functionName}".ToUpperInvariant();
+            WriteLabel(thisFunction);
+            for (int i = 0; i < lclVariables; i++)
+            {
+                SetLclToZero(i);
+            }
+        }
+
+        private void SetLclToZero(int lclIndex)
+        {
+            WriteAsmCommand("@1");
+            WriteAsmCommand("D=M");
+            WriteAsmCommand($"@{lclIndex}");
+            WriteAsmCommand("D=D+A");
+            WriteAsmCommand("A=D");
+            WriteAsmCommand("M=0");
+        }
+
+        public void WriteCallFunction(string functionName, string args)
+        {
+            string caller = $"{className}&{methodName}".ToUpperInvariant();
+            string calledFunction = $"{className}&{functionName}".ToUpperInvariant();
+            WriteAsmCommand($"@{caller}");
+            PushAOnStack();
+            PushSegmentAddressOnStack(MemorySegments.Local);
+            PushSegmentAddressOnStack(MemorySegments.Argument);
+            PushSegmentAddressOnStack(MemorySegments.This);
+            PushSegmentAddressOnStack(MemorySegments.That);
+            RepositionArg(int.Parse(args));
+            RepositionLocal();
+            WriteGoto(calledFunction);
+            WriteLabel(caller);
+        }
+
+        private void RepositionLocal()
+        {
+            WriteAsmCommand($"@SP");
+            WriteAsmCommand($"D=M");
+            WriteAsmCommand($"@1");
+            WriteAsmCommand($"M=D");
+        }
+
+        private void RepositionArg(int argsCount)
+        {
+            // arg = sp - 5 - argscount
+            WriteAsmCommand($"@SP");
+            WriteAsmCommand($"D=M");
+            WriteAsmCommand($"@5");
+            WriteAsmCommand($"D=D-A");
+            WriteAsmCommand($"@{argsCount}");
+            WriteAsmCommand($"D=D-A");
+            WriteAsmCommand($"@2");
+            WriteAsmCommand($"M=D");
+        }
+
+        private void PushSegmentAddressOnStack(MemorySegments segment)
+        {
+            if (segment == MemorySegments.Local)
+            {
+                WriteAsmCommand("@1");
+            }
+            else if (segment == MemorySegments.Argument)
+            {
+                WriteAsmCommand("@2");
+            }
+            else if (segment == MemorySegments.This)
+            {
+                WriteAsmCommand("@3");
+            }
+            else if (segment == MemorySegments.That)
+            {
+                WriteAsmCommand("@4");
+            }
+            WriteAsmCommand("D=M");
+            PushDOnStack();
         }
 
         public void WriteLabel(string label)
@@ -133,14 +271,12 @@ namespace HackVmCompiler
                     WriteAsmCommand($"@SP");
                     WriteAsmCommand("A=M");
                     WriteAsmCommand("M=D");
+                    IncreaseStackPointer();
                 }
-
-                IncreaseStackPointer();
             }
             else if (command == CommandTypes.Pop)
             {
                 PopValueFromStack(segment, index);
-                DecreaseStackPointer();
             }
         }
 
@@ -197,6 +333,23 @@ namespace HackVmCompiler
             WriteAsmCommand("M=M-1");
         }
 
+        private void PushAOnStack()
+        {
+            WriteAsmCommand("D=A");
+            WriteAsmCommand("@SP");
+            WriteAsmCommand("A=M");
+            WriteAsmCommand("M=D");
+            IncreaseStackPointer();
+        }
+
+        private void PushDOnStack()
+        {
+            WriteAsmCommand("@SP");
+            WriteAsmCommand("A=M");
+            WriteAsmCommand("M=D");
+            IncreaseStackPointer();
+        }
+
         private void PushValueOnStack(int valueToPush)
         {
             if (valueToPush >= -1 && valueToPush <= 1)
@@ -212,6 +365,7 @@ namespace HackVmCompiler
             WriteAsmCommand("@SP");
             WriteAsmCommand("A=M");
             WriteAsmCommand("M=D");
+            IncreaseStackPointer();
         }
 
         private void PopValueFromStack(MemorySegments segment, int index)
@@ -260,6 +414,7 @@ namespace HackVmCompiler
             }
 
             WriteAsmCommand($"M=D");
+            DecreaseStackPointer();
         }
 
         private void StackToD()

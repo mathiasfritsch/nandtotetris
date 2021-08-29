@@ -79,7 +79,7 @@ namespace HackCPUMock
 
         private void TraceStep(bool isInitialTrace = false)
         {
-            Trace.WriteLine($"{(isInitialTrace ? "" : Instruction),-15} PC:{PC,5} A:{A,5} D:{D,5} M:{M,5} Stack:{Stack,5} SP:{RAM[0],5} argument 0:{RAM[400],5}");
+            Trace.WriteLine($"{(isInitialTrace ? "" : Instruction),-30} PC:{PC,5} A:{A,5} D:{D,5} M:{M,5} Stack:{Stack,5} SP:{RAM[0],5} LCL:{RAM[1],5} ");
         }
 
         public bool Step()

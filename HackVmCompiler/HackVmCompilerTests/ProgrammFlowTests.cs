@@ -106,7 +106,6 @@ label END_PROGRAM",
 
         [TestMethod]
         public void BasicLoop()
-
         {
             var testResult = TestHelper.CompileVmAndRunOnCpu(
              @"push constant 0
@@ -135,6 +134,29 @@ push local 0",
 
             Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
             Assert.AreEqual(6, cpu.RAM[256]);
+        }
+
+        [TestMethod]
+        public void CallFunctionSavesFrame()
+        {
+            var testResult = TestHelper.CompileVmAndRunOnCpu(
+        @"push constant 1
+push constant 2
+call SimpleFunction.test 2
+push constant 5
+function SimpleFunction.test 0
+push argument 0
+push argument 1
+add
+return",
+        new Dictionary<int, int>
+        {
+                { TestHelper.Stack,256},
+                { TestHelper.Local,300},
+                { TestHelper.Argument,400}
+        });
+            var cpu = testResult.Cpu;
+            var pdb = testResult.FileSystem.File.OpenText(@"C:\loadconstant.pdb").ReadToEnd();
         }
     }
 }
