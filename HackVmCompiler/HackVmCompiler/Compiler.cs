@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.IO.Abstractions;
 
 namespace HackVmCompiler
@@ -34,6 +35,7 @@ namespace HackVmCompiler
             while (true)
             {
                 fileStreamPdb.WriteLine($@"lineVm:{PrettyNumber(lineVm)} lineAsm:{PrettyNumber(codeWriter.AsmLineIndex)}");
+
                 parser.Advance();
                 var cmd = parser.CommandType;
                 if (cmd == CommandTypes.Arithmetic)
@@ -55,6 +57,18 @@ namespace HackVmCompiler
                 else if (cmd == CommandTypes.Label)
                 {
                     codeWriter.WriteLabel(parser.Arg1);
+                }
+                else if (cmd == CommandTypes.Call)
+                {
+                    codeWriter.WriteCallFunction(parser.Arg1, parser.Arg2);
+                }
+                else if (cmd == CommandTypes.Function)
+                {
+                    codeWriter.WriteFunction(parser.Arg1, int.Parse(parser.Arg2));
+                }
+                else if (cmd == CommandTypes.Return)
+                {
+                    codeWriter.WriteReturn();
                 }
 
                 if (!parser.HasMoreCommands) break;
