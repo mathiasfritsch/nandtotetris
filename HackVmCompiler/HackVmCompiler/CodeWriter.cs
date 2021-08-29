@@ -100,6 +100,32 @@ namespace HackVmCompiler
             }
         }
 
+        public void WriteFunction(string functionName, int lclVariables)
+        {
+            string thisFunction = $"{className}&{functionName}".ToUpperInvariant();
+            WriteLabel(thisFunction);
+            for (int i = 0; i < lclVariables; i++)
+            {
+                SetLclToZero(i);
+            }
+        }
+
+        public void WriteCallFunction(string functionName, string args)
+        {
+            string caller = $"{className}&{methodName}".ToUpperInvariant();
+            string calledFunction = $"{className}&{functionName}".ToUpperInvariant();
+            WriteAsmCommand($"@{caller}");
+            PushAOnStack();
+            PushSegmentAddressOnStack(MemorySegments.Local);
+            PushSegmentAddressOnStack(MemorySegments.Argument);
+            PushSegmentAddressOnStack(MemorySegments.This);
+            PushSegmentAddressOnStack(MemorySegments.That);
+            RepositionArg(int.Parse(args));
+            RepositionLocal();
+            WriteGoto(calledFunction);
+            WriteLabel(caller);
+        }
+
         public void WriteReturn()
         {
             //FRAME = LCL
@@ -159,16 +185,6 @@ namespace HackVmCompiler
             WriteAsmCommand("0;JMP");
         }
 
-        public void WriteFunction(string functionName, int lclVariables)
-        {
-            string thisFunction = $"{className}&{functionName}".ToUpperInvariant();
-            WriteLabel(thisFunction);
-            for (int i = 0; i < lclVariables; i++)
-            {
-                SetLclToZero(i);
-            }
-        }
-
         private void SetLclToZero(int lclIndex)
         {
             WriteAsmCommand("@1");
@@ -177,22 +193,6 @@ namespace HackVmCompiler
             WriteAsmCommand("D=D+A");
             WriteAsmCommand("A=D");
             WriteAsmCommand("M=0");
-        }
-
-        public void WriteCallFunction(string functionName, string args)
-        {
-            string caller = $"{className}&{methodName}".ToUpperInvariant();
-            string calledFunction = $"{className}&{functionName}".ToUpperInvariant();
-            WriteAsmCommand($"@{caller}");
-            PushAOnStack();
-            PushSegmentAddressOnStack(MemorySegments.Local);
-            PushSegmentAddressOnStack(MemorySegments.Argument);
-            PushSegmentAddressOnStack(MemorySegments.This);
-            PushSegmentAddressOnStack(MemorySegments.That);
-            RepositionArg(int.Parse(args));
-            RepositionLocal();
-            WriteGoto(calledFunction);
-            WriteLabel(caller);
         }
 
         private void RepositionLocal()
