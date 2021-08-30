@@ -29,7 +29,14 @@ namespace HackCPUMock
             while (reader.Peek() >= 0)
             {
                 string cmd = reader.ReadLine();
-                Programm[pcIndex] = cmd;
+                string cmdWithoutComment;
+                if (cmd.Contains("--"))
+                {
+                    cmdWithoutComment = cmd.Substring(0, cmd.IndexOf("--"));
+                }
+                else cmdWithoutComment = cmd;
+
+                Programm[pcIndex] = cmdWithoutComment.Trim();
                 pcIndex++;
             }
             for (int instructionIndex = 0; instructionIndex < pcIndex; instructionIndex++)

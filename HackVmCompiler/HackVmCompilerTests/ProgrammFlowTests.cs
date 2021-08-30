@@ -148,6 +148,7 @@ function SimpleFunction.test 0
 push argument 0
 push argument 1
 add
+push constant 7
 return",
         new Dictionary<int, int>
         {

@@ -10,6 +10,7 @@ namespace HackVmCompiler
         private readonly string sourcePath;
 
         private readonly string targetPath;
+        private bool writeCommandAsComment = false;
 
         public Compiler(IFileSystem fileSystem, string sourcePath, string targetPath)
 
@@ -37,6 +38,7 @@ namespace HackVmCompiler
                 fileStreamPdb.WriteLine($@"lineVm:{PrettyNumber(lineVm)} lineAsm:{PrettyNumber(codeWriter.AsmLineIndex)}");
 
                 parser.Advance();
+                codeWriter.CurrentVmLine = parser.CurrentLine;
                 var cmd = parser.CommandType;
                 if (cmd == CommandTypes.Arithmetic)
                 {

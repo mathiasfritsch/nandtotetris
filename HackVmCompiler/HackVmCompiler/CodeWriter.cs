@@ -19,12 +19,26 @@ namespace HackVmCompiler
         public static readonly int TrueValue = -1;
         public static readonly int FalseValue = 0;
         private int branchingCounter = 0;
-
+        private bool vmLineWrittenAsCommand = false;
+        private string currentVmLine;
         public int AsmLineIndex { private set; get; }
 
         public void Close()
         {
             fileStream.Close();
+        }
+
+        public string CurrentVmLine
+        {
+            get
+            {
+                return currentVmLine;
+            }
+            set
+            {
+                currentVmLine = value;
+                vmLineWrittenAsCommand = false;
+            }
         }
 
         public CodeWriter(IFileSystem fileSystem)
@@ -436,7 +450,15 @@ namespace HackVmCompiler
 
         private void WriteAsmCommand(string cmd)
         {
-            fileStream.WriteLine(cmd);
+            if (vmLineWrittenAsCommand)
+            {
+                fileStream.WriteLine(cmd);
+            }
+            else
+            {
+                fileStream.WriteLine($"{cmd} --{currentVmLine}");
+                vmLineWrittenAsCommand = true;
+            }
             AsmLineIndex++;
         }
     }

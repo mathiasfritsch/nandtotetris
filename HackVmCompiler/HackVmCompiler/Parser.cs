@@ -15,16 +15,21 @@ namespace HackVmCompiler
             this.fileSystem = fileSystem;
         }
 
+        public string CurrentLine
+        {
+            get; set;
+        }
+
         public void Advance()
         {
-            string currentLine = file.ReadLine();
-            if (currentLine.StartsWith("//") || currentLine.Length == 0)
+            CurrentLine = file.ReadLine();
+            if (CurrentLine.StartsWith("//") || CurrentLine.Length == 0)
             {
                 CommandType = CommandTypes.Comment;
             }
             else
             {
-                var token = currentLine.Split();
+                var token = CurrentLine.Split();
 
                 var enumText = token[0].Replace("-", "");
 
