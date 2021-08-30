@@ -10,14 +10,16 @@ namespace HackVmCompiler
         private readonly string sourcePath;
 
         private readonly string targetPath;
-        private bool writeCommandAsComment = false;
+        private readonly bool writeCommandAsComment = false;
+        private readonly bool writeComments = false;
 
-        public Compiler(IFileSystem fileSystem, string sourcePath, string targetPath)
+        public Compiler(IFileSystem fileSystem, string sourcePath, string targetPath, bool writeComments)
 
         {
             this.fileSystem = fileSystem;
             this.sourcePath = sourcePath;
             this.targetPath = targetPath;
+            this.writeComments = writeComments;
         }
 
         public void Run()
@@ -38,7 +40,11 @@ namespace HackVmCompiler
                 fileStreamPdb.WriteLine($@"lineVm:{PrettyNumber(lineVm)} lineAsm:{PrettyNumber(codeWriter.AsmLineIndex)}");
 
                 parser.Advance();
-                codeWriter.CurrentVmLine = parser.CurrentLine;
+                if (writeComments)
+                {
+                    codeWriter.CurrentVmLine = parser.CurrentLine;
+                }
+
                 var cmd = parser.CommandType;
                 if (cmd == CommandTypes.Arithmetic)
                 {

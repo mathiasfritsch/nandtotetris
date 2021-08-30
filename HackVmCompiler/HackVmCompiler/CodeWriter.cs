@@ -10,10 +10,9 @@ namespace HackVmCompiler
         private readonly IFileSystem fileSystem;
         private string className = "main";
         private string methodName = "main";
-
-        private const int memorySegmentLocalStart = 300;
-        private const int memorySegmentArgumentStart = 400;
+        private const int memorySegmentLcl = 1;
         private const int memorySegmentTempStart = 5;
+        private const int memorySegmentArg = 2;
         private const int memorySegmentThis = 3;
         private const int memorySegmentThat = 4;
         public static readonly int TrueValue = -1;
@@ -297,24 +296,29 @@ namespace HackVmCompiler
         private void GetSegmentValueOnD(MemorySegments segment, int index)
         {
             int segmentPointer = 0;
-            if (segment == MemorySegments.Local)
-            {
-                segmentPointer = memorySegmentLocalStart;
-            }
-            else if (segment == MemorySegments.Argument)
-            {
-                segmentPointer = memorySegmentArgumentStart;
-            }
-            if (segment == MemorySegments.This || segment == MemorySegments.That)
+
+            if (segment == MemorySegments.This ||
+                segment == MemorySegments.That ||
+                segment == MemorySegments.Local ||
+                segment == MemorySegments.Argument)
             {
                 if (segment == MemorySegments.This)
                 {
                     WriteAsmCommand($"@{memorySegmentThis}");
                 }
-                else
+                else if (segment == MemorySegments.That)
                 {
                     WriteAsmCommand($"@{memorySegmentThat}");
                 }
+                else if (segment == MemorySegments.Local)
+                {
+                    WriteAsmCommand($"@{memorySegmentLcl}");
+                }
+                else
+                {
+                    WriteAsmCommand($"@{memorySegmentArg}");
+                }
+
                 WriteAsmCommand($"D=M");
                 WriteAsmCommand($"@{index}");
                 WriteAsmCommand($"A=D+A");
@@ -327,7 +331,10 @@ namespace HackVmCompiler
             {
                 segmentPointer = memorySegmentThis;
             }
-            if (segment != MemorySegments.This && segment != MemorySegments.That)
+            if (segment != MemorySegments.This
+                && segment != MemorySegments.That
+                && segment != MemorySegments.Argument
+                && segment != MemorySegments.Local)
             {
                 WriteAsmCommand($"@{segmentPointer + index}");
             }
@@ -384,12 +391,20 @@ namespace HackVmCompiler
 
         private void PopValueFromStack(MemorySegments segment, int index)
         {
-            if (segment == MemorySegments.That || segment == MemorySegments.This)
+            if (segment == MemorySegments.That
+                || segment == MemorySegments.This
+                || segment == MemorySegments.Local
+                 || segment == MemorySegments.Argument
+                )
             {
                 if (segment == MemorySegments.This)
                     WriteAsmCommand($"@{memorySegmentThis}");
-                else
+                else if (segment == MemorySegments.That)
                     WriteAsmCommand($"@{memorySegmentThat}");
+                else if (segment == MemorySegments.Local)
+                    WriteAsmCommand($"@{memorySegmentLcl}");
+                else if (segment == MemorySegments.Argument)
+                    WriteAsmCommand($"@{memorySegmentArg}");
 
                 WriteAsmCommand($"D=M");
                 WriteAsmCommand($"@{index}");
@@ -400,15 +415,8 @@ namespace HackVmCompiler
 
             StackToD();
             int startSegment = 0;
-            if (segment == MemorySegments.Local)
-            {
-                startSegment = memorySegmentLocalStart;
-            }
-            else if (segment == MemorySegments.Argument)
-            {
-                startSegment = memorySegmentArgumentStart;
-            }
-            else if (segment == MemorySegments.Temp)
+
+            if (segment == MemorySegments.Temp)
             {
                 startSegment = memorySegmentTempStart;
             }
@@ -416,7 +424,10 @@ namespace HackVmCompiler
             {
                 startSegment = memorySegmentThis;
             }
-            if (segment == MemorySegments.That || segment == MemorySegments.This)
+            if (segment == MemorySegments.That
+                || segment == MemorySegments.This
+                  || segment == MemorySegments.Local
+                    || segment == MemorySegments.Argument)
             {
                 WriteAsmCommand($"@R13");
                 WriteAsmCommand($"A=M");
@@ -450,7 +461,7 @@ namespace HackVmCompiler
 
         private void WriteAsmCommand(string cmd)
         {
-            if (vmLineWrittenAsCommand)
+            if (vmLineWrittenAsCommand || string.IsNullOrEmpty(currentVmLine))
             {
                 fileStream.WriteLine(cmd);
             }
