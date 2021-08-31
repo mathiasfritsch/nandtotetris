@@ -131,7 +131,9 @@ namespace HackCPUMock
         {
             get
             {
-                return Programm[PC];
+                if (Programm.Length > PC)
+                    return Programm[PC];
+                else return null;
             }
         }
 
