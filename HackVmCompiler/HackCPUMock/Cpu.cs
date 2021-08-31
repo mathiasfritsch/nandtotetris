@@ -15,6 +15,23 @@ namespace HackCPUMock
         public static readonly int FalseValue = 0;
         private readonly Dictionary<int, int> pdb = new Dictionary<int, int>();
         private readonly int? stopAtVmLine;
+        private readonly Dictionary<string, int> variableTable = new Dictionary<string, int>();
+
+        private readonly Dictionary<string, int> fixedSymbols = new Dictionary<string, int>
+        {
+            { "@SP",0 },
+            { "@LCL",1 },
+            { "@ARG",2 },
+            { "@THIS",3 },
+            { "@THAT",4 }
+        };
+
+        private readonly Dictionary<string, int> fixedRegisters = new Dictionary<string, int>
+        {
+            { "@R13",13 },
+            { "@R14",14 },
+            { "@R15",15 }
+        };
 
         public Dictionary<int, int> PDB
         {
@@ -27,7 +44,6 @@ namespace HackCPUMock
         public Cpu(IFileSystem fileSystem, int? stopAtVmLine = null)
         {
             this.fileSystem = fileSystem;
-            RAM[0] = 256;
             this.symbolTable = new Dictionary<string, int>();
             this.stopAtVmLine = stopAtVmLine;
         }
@@ -63,6 +79,12 @@ namespace HackCPUMock
                 Programm[pcIndex] = cmdWithoutComment.Trim();
                 pcIndex++;
             }
+
+            var labelList = Programm
+                    .Where(p => p != null && p.StartsWith("("))
+                    .Select(p => p.TrimStart('(').TrimEnd(')'))
+                    .ToArray();
+
             for (int instructionIndex = 0; instructionIndex < pcIndex; instructionIndex++)
             {
                 var instruction = Programm[instructionIndex];
@@ -70,6 +92,27 @@ namespace HackCPUMock
                 if (Programm[instructionIndex].StartsWith("("))
                 {
                     AddSymbol(instruction, instructionIndex);
+                }
+                if (instruction.StartsWith("@")
+                    && !fixedSymbols.ContainsKey(instruction)
+                    && !variableTable.ContainsKey(instruction)
+                    && !fixedRegisters.ContainsKey(instruction)
+                    && !labelList.Contains(instruction.TrimStart('@'))
+                    && !instruction.TrimStart('@').All(Char.IsDigit))
+                {
+                    variableTable.Add(Programm[instructionIndex], variableTable.Count);
+                }
+            }
+            for (int instructionIndex = 0; instructionIndex < pcIndex; instructionIndex++)
+            {
+                var instruction = Programm[instructionIndex];
+                if (variableTable.ContainsKey(instruction))
+                {
+                    Programm[instructionIndex] = $"@{variableTable[instruction] + 16}";
+                }
+                else if (fixedSymbols.ContainsKey(instruction))
+                {
+                    Programm[instructionIndex] = $"@{fixedSymbols[instruction]}";
                 }
             }
         }
@@ -96,7 +139,8 @@ namespace HackCPUMock
         {
             get
             {
-                return RAM[RAM[0] - 1];
+                if (RAM[0] > 0) return RAM[RAM[0] - 1];
+                return -1;
             }
         }
 

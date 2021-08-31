@@ -142,58 +142,60 @@ namespace HackVmCompiler
         public void WriteReturn()
         {
             //FRAME = LCL
-            WriteAsmCommand("@1");
+            WriteAsmCommand("@LCL");
             WriteAsmCommand("D=M");
+            WriteAsmCommand("@frame");
+            WriteAsmCommand("M=D");
 
             //Return = FRAME-5
             WriteAsmCommand("@5");
             WriteAsmCommand("D=D-A");
             WriteAsmCommand("A=D");
             WriteAsmCommand("D=M");
-            WriteAsmCommand("@R15");
+            WriteAsmCommand("@return");
             WriteAsmCommand("M=D");
 
             // return value on argument 0
             PopValueFromStack(MemorySegments.Argument, 0);
 
             // SP = arg + 1
-            WriteAsmCommand("@2");
+            WriteAsmCommand("@ARG");
             WriteAsmCommand("D=M+1");
             WriteAsmCommand("@SP");
             WriteAsmCommand("M=D");
 
             //that = FRAME-1
-            WriteAsmCommand("@1");
+            WriteAsmCommand("@LCL");
             WriteAsmCommand("D=M-1");
             WriteAsmCommand("@4");
             WriteAsmCommand("M=D");
 
             //this = FRAME-2
-            WriteAsmCommand("@1");
+            WriteAsmCommand("@LCL");
             WriteAsmCommand("D=M");
             WriteAsmCommand("@2");
             WriteAsmCommand("D=D-A");
-            WriteAsmCommand("@3");
+            WriteAsmCommand("@THIS");
             WriteAsmCommand("M=D");
 
             //arg = FRAME-3
-            WriteAsmCommand("@1");
+            WriteAsmCommand("@LCL");
             WriteAsmCommand("D=M");
             WriteAsmCommand("@3");
             WriteAsmCommand("D=D-A");
-            WriteAsmCommand("@2");
+            WriteAsmCommand("@ARG");
             WriteAsmCommand("M=D");
 
             //local = FRAME-4
-            WriteAsmCommand("@1");
+            WriteAsmCommand("@LCL");
             WriteAsmCommand("D=M");
             WriteAsmCommand("@4");
             WriteAsmCommand("D=D-A");
-            WriteAsmCommand("@1");
+            WriteAsmCommand("@LCL");
             WriteAsmCommand("M=D");
 
             //Return
-            WriteAsmCommand("@R15");
+            WriteAsmCommand("@return");
             WriteAsmCommand("A=M");
             WriteAsmCommand("0;JMP");
         }

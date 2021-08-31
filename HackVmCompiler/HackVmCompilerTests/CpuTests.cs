@@ -9,6 +9,28 @@ namespace HackVmCompilerTests
     public class CpuTests
     {
         [TestMethod]
+        public void VariableTest()
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+                {
+                    { @"c:\cputest.asm", new MockFileData(@"@var1
+@var2
+@var3
+D=A") },
+                });
+
+            var cpu = new Cpu(fileSystem);
+            cpu.ReadAsm(@"c:\cputest.asm");
+
+            while (true)
+            {
+                if (!cpu.Step()) break;
+            }
+
+            Assert.AreEqual(18, cpu.D);
+        }
+
+        [TestMethod]
         public void AssignDTest()
         {
             var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>

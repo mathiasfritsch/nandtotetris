@@ -9,7 +9,15 @@ namespace HackVmCompilerTests
         [TestMethod]
         public void PushTest()
         {
-            var cpu = TestHelper.CompileVmAndRunOnCpu(@"push constant 5").Cpu;
+            var cpu = TestHelper.CompileVmAndRunOnCpu(@"push constant 5",
+                initialData: new Dictionary<int, int>
+                {
+                    {0,256},
+                    {1,300},
+                    {2,400},
+                    {3,3000 },
+                    {4,3010 }
+                }).Cpu;
             Assert.AreEqual(5, cpu.RAM[256]);
         }
 
@@ -83,6 +91,7 @@ add",
                 @"push this 5",
                 new Dictionary<int, int>
                 {
+                    { 0,256},
                     { 3,3030},
                     { 5,3030},
                     { 3035,305}
