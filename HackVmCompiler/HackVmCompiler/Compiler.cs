@@ -37,7 +37,7 @@ namespace HackVmCompiler
 
             while (true)
             {
-                fileStreamPdb.WriteLine($@"lineVm:{PrettyNumber(lineVm)} lineAsm:{PrettyNumber(codeWriter.AsmLineIndex)}");
+                fileStreamPdb.WriteLine($@"lineVm:{PrettyNumber(lineVm + 1)} lineAsm:{PrettyNumber(codeWriter.AsmLineIndex + 1)}");
 
                 parser.Advance();
                 if (writeComments)

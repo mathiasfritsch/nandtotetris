@@ -9,21 +9,45 @@ namespace HackCPUMock
 {
     public class Cpu
     {
-        private readonly IFileSystem _fileSystem;
-        private Dictionary<string, int> _symbolTable;
+        private readonly IFileSystem fileSystem;
+        private readonly Dictionary<string, int> symbolTable;
         public static readonly int TrueValue = -1;
         public static readonly int FalseValue = 0;
+        private readonly Dictionary<int, int> pdb = new Dictionary<int, int>();
+        private readonly int? stopAtVmLine;
 
-        public Cpu(IFileSystem fileSystem)
+        public Dictionary<int, int> PDB
         {
-            _fileSystem = fileSystem;
+            get
+            {
+                return pdb;
+            }
+        }
+
+        public Cpu(IFileSystem fileSystem, int? stopAtVmLine = null)
+        {
+            this.fileSystem = fileSystem;
             RAM[0] = 256;
-            _symbolTable = new Dictionary<string, int>();
+            this.symbolTable = new Dictionary<string, int>();
+            this.stopAtVmLine = stopAtVmLine;
+        }
+
+        public void ReadPdb(string path)
+        {
+            using var fileStream = fileSystem.FileInfo.FromFileName(path).OpenRead();
+            using var reader = new StreamReader(fileStream);
+            while (reader.Peek() >= 0)
+            {
+                string[] pdbLineParts = reader.ReadLine().Split(' ');
+                string[] vmParts = pdbLineParts[0].Split(':');
+                string[] asmParts = pdbLineParts[1].Split(':');
+                pdb.Add(int.Parse(asmParts[1]), int.Parse(vmParts[1]));
+            }
         }
 
         public void ReadAsm(string path)
         {
-            using var fileStream = _fileSystem.FileInfo.FromFileName(path).OpenRead();
+            using var fileStream = fileSystem.FileInfo.FromFileName(path).OpenRead();
             using var reader = new StreamReader(fileStream);
             var pcIndex = 0;
             while (reader.Peek() >= 0)
@@ -93,6 +117,16 @@ namespace HackCPUMock
         {
             if (PC == 0) TraceStep(true);
 
+            if (stopAtVmLine.HasValue)
+            {
+                int asmLine = PC + 1;
+                if (pdb.ContainsKey(asmLine))
+                {
+                    int vmLine = pdb[asmLine];
+                    if (vmLine == stopAtVmLine) return false;
+                }
+            }
+
             if (string.IsNullOrEmpty(Instruction)) return false;
 
             if (Instruction.StartsWith("@"))
@@ -116,7 +150,7 @@ namespace HackCPUMock
         private void AddSymbol(string instruction, int instructionIndex)
         {
             var symbol = instruction.TrimStart('(').TrimEnd(')');
-            _symbolTable.Add(symbol, instructionIndex);
+            symbolTable.Add(symbol, instructionIndex);
         }
 
         private void HandleCInstruction()
@@ -257,7 +291,7 @@ namespace HackCPUMock
             {
                 // handle lable ie @LOOP sets to where in which line
                 // of the asm code (LOOP) appears
-                A = _symbolTable[instructionPayload];
+                A = symbolTable[instructionPayload];
             }
         }
 

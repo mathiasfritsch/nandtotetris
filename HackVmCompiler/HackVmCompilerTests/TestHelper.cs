@@ -13,7 +13,9 @@ namespace HackVmCompilerTests
         public static readonly int This = 3;
         public static readonly int That = 4;
 
-        public static CompilerTestResult CompileVmAndRunOnCpu(string vmCode, Dictionary<int, int> initialData = null)
+        public static CompilerTestResult CompileVmAndRunOnCpu(string vmCode,
+            Dictionary<int, int> initialData = null,
+            int? stopAtVmLine = null)
         {
             string vmFile = @"C:\somefile.vm";
             string asmFile = @"C:\loadconstant.asm";
@@ -24,9 +26,9 @@ namespace HackVmCompilerTests
                     new MockFileData(vmCode) },
                 });
 
-            new Compiler(fileSystem, vmFile, asmFile).Run();
+            new Compiler(fileSystem, vmFile, asmFile, false).Run();
 
-            var cpu = new Cpu(fileSystem);
+            var cpu = new Cpu(fileSystem, stopAtVmLine);
             if (initialData != null)
             {
                 foreach (var address in initialData.Keys)
@@ -36,6 +38,7 @@ namespace HackVmCompilerTests
             }
 
             cpu.ReadAsm(asmFile);
+            cpu.ReadPdb(asmFile.Replace(".asm", ".pdb"));
 
             while (true)
             {

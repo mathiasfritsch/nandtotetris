@@ -1,10 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HackVmCompilerTests
 {
@@ -130,10 +126,34 @@ push local 0",
                 { 400,3}
              });
             var cpu = testResult.Cpu;
-            var pdb = testResult.FileSystem.File.OpenText(@"C:\loadconstant.pdb").ReadToEnd();
 
             Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
             Assert.AreEqual(6, cpu.RAM[256]);
+        }
+
+        [TestMethod]
+        public void FunctionReturnsResult()
+        {
+            var testResult = TestHelper.CompileVmAndRunOnCpu(
+        @"push constant 1
+push constant 2
+call SimpleFunction.test 2
+goto PROGRAMM_END
+function SimpleFunction.test 0
+push argument 0
+push argument 1
+add
+return
+label PROGRAMM_END",
+        new Dictionary<int, int>
+        {
+                { TestHelper.Stack,256},
+                { TestHelper.Local,300},
+                { TestHelper.Argument,400}
+        });
+            var cpu = testResult.Cpu;
+            Assert.AreEqual(257, cpu.RAM[TestHelper.Stack]);
+            Assert.AreEqual(3, cpu.Stack);
         }
 
         [TestMethod]
@@ -143,21 +163,33 @@ push local 0",
         @"push constant 1
 push constant 2
 call SimpleFunction.test 2
-push constant 5
+goto PROGRAMM_END
 function SimpleFunction.test 0
 push argument 0
 push argument 1
 add
-push constant 7
-return",
+return
+label PROGRAMM_END",
         new Dictionary<int, int>
         {
                 { TestHelper.Stack,256},
                 { TestHelper.Local,300},
-                { TestHelper.Argument,400}
-        });
+                { TestHelper.Argument,400},
+                { TestHelper.This,2000},
+                { TestHelper.That,3000}
+        },
+        stopAtVmLine: 5);
             var cpu = testResult.Cpu;
-            var pdb = testResult.FileSystem.File.OpenText(@"C:\loadconstant.pdb").ReadToEnd();
+
+            var lineAfterCallFunction = cpu.PDB.Single(vm => vm.Value == 4);
+            Assert.AreEqual(lineAfterCallFunction.Key - 2, cpu.RAM[258]);
+            Assert.AreEqual(300, cpu.RAM[259]);
+            Assert.AreEqual(400, cpu.RAM[260]);
+            Assert.AreEqual(2000, cpu.RAM[261]);
+            Assert.AreEqual(3000, cpu.RAM[262]);
+            Assert.AreEqual(263, cpu.RAM[TestHelper.Stack]);
+            Assert.AreEqual(256, cpu.RAM[TestHelper.Argument]);
+            Assert.AreEqual(263, cpu.RAM[TestHelper.Local]);
         }
     }
 }
