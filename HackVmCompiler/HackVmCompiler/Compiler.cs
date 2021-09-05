@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.IO.Abstractions;
 
 namespace HackVmCompiler
@@ -10,7 +9,6 @@ namespace HackVmCompiler
         private readonly string sourcePath;
 
         private readonly string targetPath;
-        private readonly bool writeCommandAsComment = false;
         private readonly bool writeComments = false;
 
         public Compiler(IFileSystem fileSystem, string sourcePath, string targetPath, bool writeComments)

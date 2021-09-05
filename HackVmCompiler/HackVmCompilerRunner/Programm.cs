@@ -10,13 +10,8 @@ namespace HackVmCompilerRunner
             var sourcePath = args.Length > 0 ? args[0] : @"C:\TEMP\SimpleFunctionDebug2\SimpleFunction.vm";
             var targetPath = args.Length > 1 ? args[1] : @"C:\TEMP\SimpleFunctionDebug2\SimpleFunction.asm";
 
-            Compiler compiler = new Compiler(new FileSystem(), sourcePath, targetPath, false);
+            Compiler compiler = new Compiler(new FileSystem(), sourcePath, targetPath, true);
             compiler.Run();
-
-            targetPath = args.Length > 1 ? args[1] : @"C:\TEMP\SimpleFunctionDebug\SimpleFunction_log.asm";
-
-            Compiler compilerLog = new Compiler(new FileSystem(), sourcePath, targetPath, true);
-            compilerLog.Run();
         }
     }
 }

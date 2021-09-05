@@ -8,8 +8,7 @@ namespace HackVmCompiler
     {
         private StreamWriter fileStream;
         private readonly IFileSystem fileSystem;
-        private string className = "main";
-        private string methodName = "main";
+        private readonly string methodName = "main";
         private const int memorySegmentLcl = 1;
         private const int memorySegmentTempStart = 5;
         private const int memorySegmentArg = 2;
@@ -115,18 +114,18 @@ namespace HackVmCompiler
 
         public void WriteFunction(string functionName, int lclVariables)
         {
-            string thisFunction = $"{className}&{functionName}".ToUpperInvariant();
+            string thisFunction = $"{functionName}";
             WriteLabel(thisFunction);
             for (int i = 0; i < lclVariables; i++)
             {
-                SetLclToZero(i);
+                SetLclToZero();
             }
         }
 
         public void WriteCallFunction(string functionName, string args)
         {
-            string caller = $"{className}&{methodName}".ToUpperInvariant();
-            string calledFunction = $"{className}&{functionName}".ToUpperInvariant();
+            string caller = $"{methodName}";
+            string calledFunction = $"{functionName}";
             WriteAsmCommand($"@{caller}");
             PushAOnStack();
             PushSegmentAddressOnStack(MemorySegments.Local);
@@ -200,14 +199,13 @@ namespace HackVmCompiler
             WriteAsmCommand("0;JMP");
         }
 
-        private void SetLclToZero(int lclIndex)
+        private void SetLclToZero()
         {
-            WriteAsmCommand("@1");
-            WriteAsmCommand("D=M");
-            WriteAsmCommand($"@{lclIndex}");
-            WriteAsmCommand("D=D+A");
-            WriteAsmCommand("A=D");
+            WriteAsmCommand("@SP");
+            WriteAsmCommand("A=M");
             WriteAsmCommand("M=0");
+            WriteAsmCommand("@SP");
+            WriteAsmCommand("M=M+1");
         }
 
         private void RepositionLocal()
@@ -255,12 +253,12 @@ namespace HackVmCompiler
 
         public void WriteLabel(string label)
         {
-            WriteAsmCommand($"({label.ToUpper()})");
+            WriteAsmCommand($"({label})");
         }
 
         public void WriteGoto(string label)
         {
-            WriteAsmCommand($"@{label.ToUpper()}");
+            WriteAsmCommand($"@{label}");
             WriteAsmCommand("0;JMP");
         }
 
@@ -268,7 +266,7 @@ namespace HackVmCompiler
         {
             StackToD();
             DecreaseStackPointer();
-            WriteAsmCommand($"@{label.ToUpper()}");
+            WriteAsmCommand($"@{label}");
             WriteAsmCommand($"D;JNE");
         }
 
@@ -463,15 +461,13 @@ namespace HackVmCompiler
 
         private void WriteAsmCommand(string cmd)
         {
-            if (vmLineWrittenAsCommand || string.IsNullOrEmpty(currentVmLine))
+            if (!vmLineWrittenAsCommand && !string.IsNullOrEmpty(currentVmLine))
             {
-                fileStream.WriteLine(cmd);
-            }
-            else
-            {
-                fileStream.WriteLine($"{cmd} --{currentVmLine}");
+                fileStream.WriteLine($"// {currentVmLine}");
+                AsmLineIndex++;
                 vmLineWrittenAsCommand = true;
             }
+            fileStream.WriteLine(cmd);
             AsmLineIndex++;
         }
     }
