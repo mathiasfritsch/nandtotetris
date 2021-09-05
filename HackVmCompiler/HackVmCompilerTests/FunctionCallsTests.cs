@@ -40,6 +40,12 @@ return",
                 { 316,4010}
     });
             var cpu = testResult.Cpu;
+            Assert.AreEqual(311, cpu.RAM[0]);
+            Assert.AreEqual(1196, cpu.RAM[310]);
+            Assert.AreEqual(305, cpu.RAM[1]);
+            Assert.AreEqual(300, cpu.RAM[2]);
+            Assert.AreEqual(3010, cpu.RAM[3]);
+            Assert.AreEqual(4010, cpu.RAM[4]);
         }
 
         [TestMethod]
