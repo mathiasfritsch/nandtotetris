@@ -183,6 +183,14 @@ namespace HackCPUMock
             {
                 // lable found
             }
+            else if (Instruction.StartsWith("//"))
+            {
+                // comment found
+            }
+            else if (Instruction == "debugger")
+            {
+                // comment found
+            }
             else
             {
                 HandleCInstruction();

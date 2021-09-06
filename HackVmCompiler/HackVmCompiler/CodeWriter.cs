@@ -169,35 +169,42 @@ namespace HackVmCompiler
 
             //that = FRAME-1
             WriteAsmCommand("// that = frame - 1");
-            WriteAsmCommand("@LCL");
-            WriteAsmCommand("D=M-1");
-            WriteAsmCommand("@4");
+            WriteAsmCommand("@frame");
+            WriteAsmCommand("A=M-1");
+            WriteAsmCommand("D=M");
+            WriteAsmCommand("@THAT");
             WriteAsmCommand("M=D");
 
-            //this = FRAME-2
+            ////this = FRAME-2
             WriteAsmCommand("// this = frame - 2");
-            WriteAsmCommand("@LCL");
+            WriteAsmCommand("@frame");
             WriteAsmCommand("D=M");
             WriteAsmCommand("@2");
             WriteAsmCommand("D=D-A");
+            WriteAsmCommand("A=D");
+            WriteAsmCommand("D=M");
             WriteAsmCommand("@THIS");
             WriteAsmCommand("M=D");
 
-            //arg = FRAME-3
-            WriteAsmCommand("// arg = frame - 3");
-            WriteAsmCommand("@LCL");
+            ////arg = FRAME-3
+            WriteAsmCommand("// arg = FRAME-3");
+            WriteAsmCommand("@frame");
             WriteAsmCommand("D=M");
             WriteAsmCommand("@3");
             WriteAsmCommand("D=D-A");
+            WriteAsmCommand("A=D");
+            WriteAsmCommand("D=M");
             WriteAsmCommand("@ARG");
             WriteAsmCommand("M=D");
 
-            //local = FRAME-4
-            WriteAsmCommand("// local = frame - 4");
-            WriteAsmCommand("@LCL");
+            ////local = FRAME-4
+            WriteAsmCommand("// local = FRAME-4");
+            WriteAsmCommand("@frame");
             WriteAsmCommand("D=M");
             WriteAsmCommand("@4");
             WriteAsmCommand("D=D-A");
+            WriteAsmCommand("A=D");
+            WriteAsmCommand("D=M");
             WriteAsmCommand("@LCL");
             WriteAsmCommand("M=D");
 
