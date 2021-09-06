@@ -8,6 +8,8 @@ namespace HackVmCompiler
     {
         private StreamReader file;
         private readonly IFileSystem fileSystem;
+        public bool IsFolder { get; set; }
+        public string[] Files { private get; set; }
 
         public Parser(IFileSystem fileSystem)
         {
@@ -66,14 +68,27 @@ namespace HackVmCompiler
             get; set;
         }
 
-        public void SetFile(string fileName)
+        public void SetFileOrFolder(string path)
         {
-            file = fileSystem.File.OpenText(fileName);
+            FileAttributes attr = File.GetAttributes(path);
+            IsFolder = (attr & FileAttributes.Directory) == FileAttributes.Directory;
+
+            if (!IsFolder)
+            {
+                file = fileSystem.File.OpenText(path);
+            }
+            else
+            {
+                Files = fileSystem.Directory.GetFiles(path, "*.vm");
+            }
         }
 
         public void Dispose()
         {
-            file.Dispose();
+            if (!IsFolder)
+            {
+                file.Dispose();
+            }
         }
 
         public bool HasMoreCommands

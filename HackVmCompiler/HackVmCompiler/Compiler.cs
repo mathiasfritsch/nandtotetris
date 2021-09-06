@@ -25,14 +25,19 @@ namespace HackVmCompiler
             var parser = new Parser(fileSystem);
             var codeWriter = new CodeWriter(fileSystem);
 
-            parser.SetFile(sourcePath);
+            parser.SetFileOrFolder(sourcePath);
             codeWriter.SetFile(targetPath);
             var pdbFile = targetPath.Replace(".asm", ".pdb");
 
             fileSystem.File.Delete(pdbFile);
-            using StreamWriter fileStreamPdb = fileSystem.FileInfo.FromFileName(pdbFile).CreateText();
-            int lineVm = 0;
+            var fileInfo = fileSystem.FileInfo.FromFileName(pdbFile);
 
+            using StreamWriter fileStreamPdb = fileInfo.CreateText();
+            int lineVm = 0;
+            if (sourcePath.EndsWith("sys.vm", comparisonType: System.StringComparison.InvariantCultureIgnoreCase))
+            {
+                codeWriter.WriteBootstrap();
+            }
             while (true)
             {
                 fileStreamPdb.WriteLine($@"lineVm:{PrettyNumber(lineVm + 1)} lineAsm:{PrettyNumber(codeWriter.AsmLineIndex + 1)}");
