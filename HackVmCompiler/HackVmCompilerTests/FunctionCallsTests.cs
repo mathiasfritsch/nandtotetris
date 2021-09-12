@@ -108,5 +108,35 @@ label PROGRAMM_END",
             Assert.AreEqual(256, cpu.RAM[TestHelper.Argument]);
             Assert.AreEqual(263, cpu.RAM[TestHelper.Local]);
         }
+
+        [TestMethod]
+        public void CallNested()
+        {
+            var testResult = TestHelper.CompileVmAndRunOnCpu(
+        @"function Sys.init 0
+push constant 2
+call Sys.add12 1
+label LOOP
+goto LOOP
+function Sys.add12 0
+push argument 0
+call Sys.add10 1
+return
+function Sys.add10 0
+push argument 0
+push constant 10
+add
+return",
+        new Dictionary<int, int>
+        {
+                { TestHelper.Stack,256},
+                { TestHelper.Local,300},
+                { TestHelper.Argument,400},
+                { TestHelper.This,2000},
+                { TestHelper.That,3000}
+        },
+        vmPath: @"c:\sys.vm");
+            var cpu = testResult.Cpu;
+        }
     }
 }

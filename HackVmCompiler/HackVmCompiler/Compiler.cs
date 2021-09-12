@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 
 namespace HackVmCompiler
 {
@@ -30,10 +31,36 @@ namespace HackVmCompiler
             var pdbFile = targetPath.Replace(".asm", ".pdb");
 
             fileSystem.File.Delete(pdbFile);
-            var fileInfo = fileSystem.FileInfo.FromFileName(pdbFile);
+            var pdbFileInfo = fileSystem.FileInfo.FromFileName(pdbFile);
 
-            using StreamWriter fileStreamPdb = fileInfo.CreateText();
+            using StreamWriter fileStreamPdb = pdbFileInfo.CreateText();
             int lineVm = 0;
+
+            if (parser.IsFolder)
+            {
+                var intFile = parser.Files.SingleOrDefault(f => f.EndsWith("sys.vm", System.StringComparison.InvariantCultureIgnoreCase));
+                if (intFile != null)
+                {
+                    parser.SetFileOrFolder(intFile);
+                    HandleInputFile(parser, codeWriter, fileStreamPdb, lineVm);
+                }
+                foreach (var file in parser.Files.Where(f => !f.EndsWith("sys.vm", System.StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    parser.SetFileOrFolder(file);
+                    lineVm = 0;
+                    HandleInputFile(parser, codeWriter, fileStreamPdb, lineVm);
+                }
+            }
+            else
+            {
+                HandleInputFile(parser, codeWriter, fileStreamPdb, lineVm);
+            }
+
+            codeWriter.Close();
+        }
+
+        private void HandleInputFile(Parser parser, CodeWriter codeWriter, StreamWriter fileStreamPdb, int lineVm)
+        {
             if (sourcePath.EndsWith("sys.vm", comparisonType: System.StringComparison.InvariantCultureIgnoreCase))
             {
                 codeWriter.WriteBootstrap();
@@ -85,7 +112,6 @@ namespace HackVmCompiler
                 if (!parser.HasMoreCommands) break;
                 lineVm++;
             }
-            codeWriter.Close();
         }
 
         private string PrettyNumber(int number) => number.ToString("000");

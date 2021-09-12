@@ -20,6 +20,7 @@ namespace HackVmCompiler
         private bool vmLineWrittenAsCommand = false;
         private string currentVmLine;
         public int AsmLineIndex { private set; get; }
+        public string CallingFunction = null;
 
         public void Close()
         {
@@ -123,6 +124,8 @@ namespace HackVmCompiler
         public void WriteFunction(string functionName, int lclVariables)
         {
             string thisFunction = $"{functionName}";
+            // used by WriteCallFunction to set caller if function calls other function
+            CallingFunction = functionName;
             WriteLabel(thisFunction);
             for (int i = 0; i < lclVariables; i++)
             {
@@ -132,7 +135,18 @@ namespace HackVmCompiler
 
         public void WriteCallFunction(string functionName, string args)
         {
-            string caller = $"{methodName}";
+            WriteAsmCommand($"// call function {functionName}");
+
+            string caller;
+            if (CallingFunction != null)
+            {
+                caller = $"{CallingFunction}.backlable";
+            }
+            else
+            {
+                caller = $"{methodName}.backlable";
+            }
+
             string calledFunction = $"{functionName}";
             WriteAsmCommand($"@{caller}");
             PushAOnStack();
@@ -143,6 +157,7 @@ namespace HackVmCompiler
             RepositionArg(int.Parse(args));
             RepositionLocal();
             WriteGoto(calledFunction);
+            WriteAsmCommand($"// caller  {caller}");
             WriteLabel(caller);
         }
 
