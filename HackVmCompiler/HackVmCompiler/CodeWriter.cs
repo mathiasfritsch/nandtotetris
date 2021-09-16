@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 
@@ -20,7 +21,7 @@ namespace HackVmCompiler
         private bool vmLineWrittenAsCommand = false;
         private string currentVmLine;
         public int AsmLineIndex { private set; get; }
-        public string CallingFunction = null;
+        public int FunctionCallCount { private set; get; }
 
         public void Close()
         {
@@ -51,6 +52,7 @@ namespace HackVmCompiler
         public CodeWriter(IFileSystem fileSystem)
         {
             this.fileSystem = fileSystem;
+            FunctionCallCount = 0;
             AsmLineIndex = 0;
         }
 
@@ -124,8 +126,6 @@ namespace HackVmCompiler
         public void WriteFunction(string functionName, int lclVariables)
         {
             string thisFunction = $"{functionName}";
-            // used by WriteCallFunction to set caller if function calls other function
-            CallingFunction = functionName;
             WriteLabel(thisFunction);
             for (int i = 0; i < lclVariables; i++)
             {
@@ -137,15 +137,8 @@ namespace HackVmCompiler
         {
             WriteAsmCommand($"// call function {functionName}");
 
-            string caller;
-            if (CallingFunction != null)
-            {
-                caller = $"{CallingFunction}.backlable";
-            }
-            else
-            {
-                caller = $"{methodName}.backlable";
-            }
+            var caller = $"{FunctionCallCount}.backlable";
+            FunctionCallCount++;
 
             string calledFunction = $"{functionName}";
             WriteAsmCommand($"@{caller}");

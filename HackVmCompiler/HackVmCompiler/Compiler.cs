@@ -38,11 +38,16 @@ namespace HackVmCompiler
 
             if (parser.IsFolder)
             {
-                var intFile = parser.Files.SingleOrDefault(f => f.EndsWith("sys.vm", System.StringComparison.InvariantCultureIgnoreCase));
-                if (intFile != null)
+                var initFile = parser.Files.SingleOrDefault(f => f.EndsWith("sys.vm", System.StringComparison.InvariantCultureIgnoreCase));
+                if (initFile != null)
                 {
-                    parser.SetFileOrFolder(intFile);
-                    HandleInputFile(parser, codeWriter, fileStreamPdb, lineVm);
+                    parser.SetFileOrFolder(initFile);
+                    HandleInputFile(
+                        parser,
+                        codeWriter,
+                        fileStreamPdb,
+                        lineVm,
+                        writeBootstrap: true);
                 }
                 foreach (var file in parser.Files.Where(f => !f.EndsWith("sys.vm", System.StringComparison.InvariantCultureIgnoreCase)))
                 {
@@ -59,9 +64,13 @@ namespace HackVmCompiler
             codeWriter.Close();
         }
 
-        private void HandleInputFile(Parser parser, CodeWriter codeWriter, StreamWriter fileStreamPdb, int lineVm)
+        private void HandleInputFile(Parser parser,
+            CodeWriter codeWriter,
+            StreamWriter fileStreamPdb,
+            int lineVm,
+            bool writeBootstrap = false)
         {
-            if (sourcePath.EndsWith("sys.vm", comparisonType: System.StringComparison.InvariantCultureIgnoreCase))
+            if (writeBootstrap)
             {
                 codeWriter.WriteBootstrap();
             }
