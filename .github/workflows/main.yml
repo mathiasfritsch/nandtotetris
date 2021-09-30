@@ -5,8 +5,8 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-    - 'HackVmCompiler/**.cs'
-    - 'HackVmCompiler/**.csproj'
+    - '**.cs'
+    - '**.csproj'
 
 env:
   DOTNET_VERSION: '5.0.301' # The .NET SDK version to use
@@ -29,6 +29,7 @@ jobs:
 
     - name: Install dependencies
       run: dotnet restore
+      working-directory: HackVmCompiler
       
     - name: Build
       run: dotnet build --configuration Release --no-restore
