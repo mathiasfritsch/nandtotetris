@@ -9,7 +9,7 @@ namespace HackVmCompiler
         private StreamReader file;
         private readonly IFileSystem fileSystem;
         public bool IsFolder { get; set; }
-        public string[] Files { private get; set; }
+        public string[] Files { get; set; }
 
         public Parser(IFileSystem fileSystem)
         {
@@ -70,7 +70,7 @@ namespace HackVmCompiler
 
         public void SetFileOrFolder(string path)
         {
-            FileAttributes attr = File.GetAttributes(path);
+            FileAttributes attr = fileSystem.File.GetAttributes(path);
             IsFolder = (attr & FileAttributes.Directory) == FileAttributes.Directory;
 
             if (!IsFolder)
