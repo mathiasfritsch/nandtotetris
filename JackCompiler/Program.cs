@@ -12,7 +12,7 @@ namespace JackCompiler
             var targetPath = args.Length > 1 ? args[1] : @"C:\TEMP\FibonacciElementDebug\FibonacciElement.asm";
 
             Tokenizer tokenizer = new Tokenizer(new FileSystem(), sourcePath);
-            //tokenizer.WriteXml(targetPath);
+            tokenizer.WriteXml(targetPath);
         }
     }
 }

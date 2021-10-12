@@ -5,7 +5,6 @@ VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompiler", "JackCompiler.csproj", "{69EA665F-FC9D-4B0C-B0DB-45B7473585B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JackCompilationEngine", "..\JackCompilationEngine\JackCompilationEngine.csproj", "{6AC6DB1E-BC46-460C-BE59-5581133647AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
